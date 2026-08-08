@@ -1,0 +1,6 @@
+{
+  "name": "Hệ Sinh Thái LMS Vật Lý - EdTech Architect",
+  "description": "Hệ thống quản lý học tập Vật lý THPT (lớp 10, 11, 12) tích hợp AI chấm điểm OCR, phân tích lỗ hổng kiến thức, ngân hàng câu hỏi GDPT 2018 và cá nhân hóa lộ trình.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
