@@ -83,24 +83,26 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({
     <div className="space-y-6">
       
       {/* Student Welcome & Gamification Banner */}
-      <div className={`p-6 rounded-lg border transition-colors shadow-lg flex flex-col md:flex-row md:items-center justify-between gap-4 ${
-        isDarkMode ? 'bg-[#18181b] border-[#27272a] text-zinc-100' : 'bg-white border-slate-200 text-slate-800'
+      <div className={`p-6 rounded-xl border transition-colors shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4 ${
+        isDarkMode ? 'bg-[#18181b] border-[#27272a] text-zinc-100' : 'bg-white border-slate-200 text-slate-800 shadow-xs'
       }`}>
         <div className="flex items-center gap-4">
           <img
             src={student.avatar}
             alt={student.name}
-            className="w-14 h-14 rounded-lg object-cover border border-[#27272a] shadow-md"
+            className="w-14 h-14 rounded-lg object-cover border border-teal-500 shadow-sm"
           />
           <div>
             <div className="flex items-center gap-2">
-              <span className="text-[10px] font-mono px-2 py-0.5 rounded border border-emerald-500/30 text-emerald-400 bg-emerald-500/5">
+              <span className={`text-[10px] font-mono px-2 py-0.5 rounded border font-bold ${
+                isDarkMode ? 'border-emerald-500/30 text-emerald-400 bg-emerald-500/5' : 'border-teal-300 text-teal-700 bg-teal-50'
+              }`}>
                 CLASS: {student.classCode}
               </span>
-              <span className="text-xs font-mono text-zinc-400">Level {student.level}</span>
+              <span className={`text-xs font-mono font-semibold ${isDarkMode ? 'text-zinc-400' : 'text-slate-500'}`}>Level {student.level}</span>
             </div>
-            <h1 className="text-xl font-semibold text-white mt-1">{student.name}</h1>
-            <p className="text-xs text-zinc-400">
+            <h1 className={`text-xl font-bold mt-1 ${isDarkMode ? 'text-white' : 'text-slate-900'}`}>{student.name}</h1>
+            <p className={`text-xs ${isDarkMode ? 'text-zinc-400' : 'text-slate-600'}`}>
               Lộ trình học tập cá nhân hóa Vật lý THPT GDPT 2018
             </p>
           </div>
@@ -111,9 +113,9 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({
           {onOpenHonorRoll && (
             <button
               onClick={onOpenHonorRoll}
-              className="p-3 rounded bg-gradient-to-r from-amber-500 via-yellow-500 to-amber-600 hover:from-amber-400 hover:to-yellow-400 text-black font-mono text-xs font-extrabold shadow-lg shadow-amber-950/30 flex items-center gap-2 cursor-pointer transition-all border border-amber-300"
+              className="p-3 rounded-lg bg-gradient-to-r from-amber-500 via-yellow-500 to-amber-600 hover:from-amber-400 hover:to-yellow-400 text-slate-900 font-mono text-xs font-extrabold shadow flex items-center gap-2 cursor-pointer transition-all border border-amber-300"
             >
-              <Award className="w-4 h-4 text-black" />
+              <Award className="w-4 h-4 text-slate-900" />
               <span className="text-left">
                 <span className="block text-[10px] text-amber-950 font-extrabold uppercase">Vinh Danh Tiêu Biểu</span>
                 <span>🏆 Bảng Vàng Thành Tích</span>
@@ -123,25 +125,29 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({
 
           <button
             onClick={() => setShowAIAnalyticsModal(true)}
-            className="p-3 rounded bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-mono text-xs font-bold shadow-lg shadow-emerald-950/30 flex items-center gap-2 cursor-pointer transition-all border border-emerald-400/40"
+            className="p-3 rounded-lg bg-gradient-to-r from-teal-600 to-emerald-600 hover:from-teal-500 hover:to-emerald-500 text-white font-mono text-xs font-bold shadow flex items-center gap-2 cursor-pointer transition-all border border-teal-400/40"
           >
-            <BarChart3 className="w-4 h-4 text-emerald-200" />
+            <BarChart3 className="w-4 h-4 text-emerald-100" />
             <span className="text-left">
-              <span className="block text-[10px] text-emerald-200 font-normal uppercase">AI Phân Tích Dữ Liệu</span>
+              <span className="block text-[10px] text-emerald-100 font-normal uppercase">AI Phân Tích Dữ Liệu</span>
               <span>Báo Cáo Vùng Yếu & Tiến Bộ</span>
             </span>
           </button>
 
-          <div className="p-3 rounded bg-[#09090b] border border-[#27272a] text-center min-w-[85px]">
-            <Flame className="w-4 h-4 text-amber-400 mx-auto mb-0.5 fill-amber-400 animate-pulse" />
-            <span className="text-xs font-mono font-bold text-amber-400 block">{student.streakDays} Ngày</span>
-            <span className="text-[10px] text-zinc-500 uppercase tracking-tight">Chuỗi học</span>
+          <div className={`p-3 rounded-lg border text-center min-w-[85px] ${
+            isDarkMode ? 'bg-[#09090b] border-[#27272a]' : 'bg-slate-50 border-slate-200 shadow-xs'
+          }`}>
+            <Flame className="w-4 h-4 text-amber-500 mx-auto mb-0.5 fill-amber-500 animate-pulse" />
+            <span className="text-xs font-mono font-bold text-amber-600 block">{student.streakDays} Ngày</span>
+            <span className={`text-[10px] uppercase tracking-tight ${isDarkMode ? 'text-zinc-500' : 'text-slate-500'}`}>Chuỗi học</span>
           </div>
 
-          <div className="p-3 rounded bg-[#09090b] border border-[#27272a] text-center min-w-[85px]">
-            <Zap className="w-4 h-4 text-emerald-400 mx-auto mb-0.5 fill-emerald-400" />
-            <span className="text-xs font-mono font-bold text-emerald-400 block">{student.xp} XP</span>
-            <span className="text-[10px] text-zinc-500 uppercase tracking-tight">Điểm XP</span>
+          <div className={`p-3 rounded-lg border text-center min-w-[85px] ${
+            isDarkMode ? 'bg-[#09090b] border-[#27272a]' : 'bg-slate-50 border-slate-200 shadow-xs'
+          }`}>
+            <Zap className="w-4 h-4 text-emerald-600 mx-auto mb-0.5 fill-emerald-600" />
+            <span className="text-xs font-mono font-bold text-emerald-600 block">{student.xp} XP</span>
+            <span className={`text-[10px] uppercase tracking-tight ${isDarkMode ? 'text-zinc-500' : 'text-slate-500'}`}>Điểm XP</span>
           </div>
         </div>
       </div>
@@ -150,15 +156,15 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         
         {/* Left: Topic Proficiency Bars */}
-        <div className={`lg:col-span-7 p-5 rounded-lg border transition-colors ${
-          isDarkMode ? 'bg-[#18181b] border-[#27272a] text-zinc-100' : 'bg-white border-slate-200 text-slate-800'
+        <div className={`lg:col-span-7 p-5 rounded-xl border transition-colors ${
+          isDarkMode ? 'bg-[#18181b] border-[#27272a] text-zinc-100' : 'bg-white border-slate-200 text-slate-800 shadow-xs'
         }`}>
-          <div className="flex items-center justify-between mb-4 border-b border-[#27272a] pb-3">
+          <div className={`flex items-center justify-between mb-4 border-b pb-3 ${isDarkMode ? 'border-[#27272a]' : 'border-slate-200'}`}>
             <div className="flex items-center gap-2">
-              <BrainCircuit className="w-4 h-4 text-emerald-400" />
-              <h3 className="font-medium text-sm text-zinc-200">Đánh Giá Mức Độ Thành Thạo Chuyên Đề</h3>
+              <BrainCircuit className="w-4 h-4 text-emerald-600" />
+              <h3 className={`font-bold text-sm ${isDarkMode ? 'text-zinc-200' : 'text-slate-800'}`}>Đánh Giá Mức Độ Thành Thạo Chuyên Đề</h3>
             </div>
-            <span className="text-[11px] font-mono text-zinc-400">AI Adaptive Heatmap</span>
+            <span className={`text-[11px] font-mono ${isDarkMode ? 'text-zinc-400' : 'text-slate-500'}`}>AI Adaptive Heatmap</span>
           </div>
 
           <div className="space-y-3.5 my-4">
@@ -169,24 +175,24 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({
                 <div
                   key={topic}
                   onClick={() => setSelectedTopic(topic)}
-                  className={`p-3 rounded border cursor-pointer transition-all ${
+                  className={`p-3 rounded-lg border cursor-pointer transition-all ${
                     selectedTopic === topic
-                      ? 'border-emerald-500/50 bg-emerald-500/5'
-                      : isDarkMode ? 'border-[#27272a] bg-[#09090b] hover:border-zinc-700' : 'border-slate-200 hover:border-slate-300'
+                      ? 'border-emerald-500 bg-emerald-50/50 shadow-xs'
+                      : isDarkMode ? 'border-[#27272a] bg-[#09090b] hover:border-zinc-700' : 'border-slate-200 bg-slate-50 hover:bg-slate-100'
                   }`}
                 >
-                  <div className="flex justify-between items-center text-xs font-medium mb-1.5">
+                  <div className="flex justify-between items-center text-xs font-semibold mb-1.5">
                     <span className="flex items-center gap-1.5">
-                      {isWeak && <span className="w-1.5 h-1.5 rounded-full bg-rose-500 animate-ping" />}
-                      <span className={isWeak ? 'text-rose-400 font-semibold' : 'text-zinc-200'}>{topic}</span>
+                      {isWeak && <span className="w-2 h-2 rounded-full bg-rose-500 animate-ping" />}
+                      <span className={isWeak ? 'text-rose-600 font-bold' : (isDarkMode ? 'text-zinc-200' : 'text-slate-800')}>{topic}</span>
                     </span>
-                    <span className={`font-mono font-bold ${isWeak ? 'text-rose-400' : 'text-emerald-400'}`}>{numPct}%</span>
+                    <span className={`font-mono font-bold ${isWeak ? 'text-rose-600' : 'text-emerald-600'}`}>{numPct}%</span>
                   </div>
 
-                  <div className="w-full h-2 rounded bg-zinc-900 overflow-hidden">
+                  <div className={`w-full h-2 rounded overflow-hidden ${isDarkMode ? 'bg-zinc-900' : 'bg-slate-200'}`}>
                     <div
                       className={`h-full rounded transition-all duration-500 ${
-                        isWeak ? 'bg-gradient-to-r from-rose-500 to-amber-500' : 'bg-gradient-to-r from-emerald-500 to-teal-400'
+                        isWeak ? 'bg-gradient-to-r from-rose-500 to-amber-500' : 'bg-gradient-to-r from-emerald-600 to-teal-500'
                       }`}
                       style={{ width: `${numPct}%` }}
                     />
