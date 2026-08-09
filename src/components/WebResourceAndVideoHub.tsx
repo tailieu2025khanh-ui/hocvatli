@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { TeachingMaterial, GradeLevel, MaterialType, ColleagueTeacher } from '../types';
 import { parseVideoLink, ParsedVideo } from '../utils/videoHelper';
-import { Video, Globe, Play, ExternalLink, Plus, Search, Filter, BookOpen, Sparkles, Send, Trash2, Eye, FileText, CheckCircle2, Bookmark, Monitor, Layers } from 'lucide-react';
+import { Video, Globe, Play, ExternalLink, Plus, Search, Filter, BookOpen, Sparkles, Send, Trash2, Eye, FileText, CheckCircle2, Bookmark, Monitor, Layers, Edit, RefreshCw } from 'lucide-react';
 
 interface WebResourceAndVideoHubProps {
   isDarkMode: boolean;
@@ -9,6 +9,7 @@ interface WebResourceAndVideoHubProps {
   currentTeacher?: ColleagueTeacher;
   onAddMaterial: (mat: TeachingMaterial) => void;
   onDeleteMaterial: (matId: string) => void;
+  onUpdateMaterial?: (mat: TeachingMaterial) => void;
   onAssignTask?: (mat: TeachingMaterial) => void;
 }
 
@@ -18,6 +19,7 @@ export const WebResourceAndVideoHub: React.FC<WebResourceAndVideoHubProps> = ({
   currentTeacher,
   onAddMaterial,
   onDeleteMaterial,
+  onUpdateMaterial,
   onAssignTask,
 }) => {
   const [activeSubTab, setActiveSubTab] = useState<'ALL' | 'VIDEOS' | 'WEB_PAGES'>('ALL');
@@ -27,6 +29,15 @@ export const WebResourceAndVideoHub: React.FC<WebResourceAndVideoHubProps> = ({
   const [addMode, setAddMode] = useState<'VIDEO' | 'WEB_PAGE'>('VIDEO');
   const [activeVideoModal, setActiveVideoModal] = useState<{ mat: TeachingMaterial; parsed: ParsedVideo } | null>(null);
   const [activeWebDocModal, setActiveWebDocModal] = useState<TeachingMaterial | null>(null);
+  const [editingMaterial, setEditingMaterial] = useState<TeachingMaterial | null>(null);
+
+  // Edit / Replace Form State
+  const [editTitle, setEditTitle] = useState<string>('');
+  const [editUrl, setEditUrl] = useState<string>('');
+  const [editDesc, setEditDesc] = useState<string>('');
+  const [editGrade, setEditGrade] = useState<GradeLevel>(12);
+  const [editTopic, setEditTopic] = useState<string>('');
+  const [editSiteName, setEditSiteName] = useState<string>('');
 
   // Filter States
   const [searchQuery, setSearchQuery] = useState<string>('');
@@ -179,10 +190,53 @@ export const WebResourceAndVideoHub: React.FC<WebResourceAndVideoHubProps> = ({
     setFormDesc('');
   };
 
-  // Open video modal
-  const handleOpenVideo = (mat: TeachingMaterial) => {
-    const parsed = parseVideoLink(mat.embedUrl || mat.webUrl || '');
-    setActiveVideoModal({ mat, parsed });
+  // Open edit / replace modal
+  const handleOpenEditModal = (mat: TeachingMaterial) => {
+    setEditingMaterial(mat);
+    setEditTitle(mat.title);
+    setEditUrl(mat.webUrl || mat.fileUrl || '');
+    setEditDesc(mat.description);
+    setEditGrade(mat.grade);
+    setEditTopic(mat.topic);
+    setEditSiteName(mat.siteName || '');
+  };
+
+  // Submit edit / replace material
+  const handleEditSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingMaterial || !editTitle.trim() || !editUrl.trim()) return;
+
+    const parsedVid = parseVideoLink(editUrl);
+    const isVid = editingMaterial.type === 'VIDEO' || parsedVid.type === 'YOUTUBE' || parsedVid.type === 'VIMEO' || parsedVid.type === 'DIRECT_MP4';
+
+    const updated: TeachingMaterial = {
+      ...editingMaterial,
+      title: editTitle,
+      description: editDesc,
+      grade: editGrade,
+      topic: editTopic,
+      webUrl: editUrl,
+      embedUrl: parsedVid.embedUrl || editUrl,
+      videoHost: isVid ? parsedVid.type : undefined,
+      siteName: editSiteName || editingMaterial.siteName || 'Video Mạng (Đã Thay Thế)',
+      thumbnailUrl: parsedVid.thumbnailUrl || editingMaterial.thumbnailUrl || 'https://images.unsplash.com/photo-1611162617213-7d7a39e9b1d7?w=600&auto=format&fit=crop&q=80'
+    };
+
+    if (onUpdateMaterial) {
+      onUpdateMaterial(updated);
+    } else {
+      onAddMaterial(updated);
+    }
+
+    setEditingMaterial(null);
+    alert(`✓ Đã thay thế thành công nội dung/video bài giảng "${editTitle}"!`);
+  };
+
+  // Confirm and Delete Material
+  const handleDeleteConfirm = (mat: TeachingMaterial) => {
+    if (window.confirm(`Bạn có chắc chắn muốn XÓA video / bài giảng "${mat.title}" khỏi hệ thống không?\n\nHành động này không thể hoàn tác.`)) {
+      onDeleteMaterial(mat.id);
+    }
   };
 
   return (
@@ -409,7 +463,16 @@ export const WebResourceAndVideoHub: React.FC<WebResourceAndVideoHubProps> = ({
                   </button>
                 )}
 
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-1.5">
+                  <button
+                    onClick={() => handleOpenEditModal(item)}
+                    className="p-2 rounded-lg bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border border-amber-500/30 cursor-pointer flex items-center gap-1"
+                    title="Thay thế / Chỉnh sửa Video hoặc Bài giảng"
+                  >
+                    <Edit className="w-4 h-4" />
+                    <span className="hidden sm:inline text-[11px] font-bold">Thay Thế</span>
+                  </button>
+
                   {onAssignTask && (
                     <button
                       onClick={() => onAssignTask(item)}
@@ -433,9 +496,9 @@ export const WebResourceAndVideoHub: React.FC<WebResourceAndVideoHubProps> = ({
                   )}
 
                   <button
-                    onClick={() => onDeleteMaterial(item.id)}
-                    className="p-2 rounded-lg bg-zinc-800 hover:bg-rose-900/40 text-zinc-400 hover:text-rose-400 border border-[#27272a] cursor-pointer"
-                    title="Xóa"
+                    onClick={() => handleDeleteConfirm(item)}
+                    className="p-2 rounded-lg bg-rose-500/10 hover:bg-rose-600/30 text-rose-400 border border-rose-500/30 cursor-pointer"
+                    title="Xóa bài giảng/video không đạt yêu cầu"
                   >
                     <Trash2 className="w-4 h-4" />
                   </button>
@@ -672,6 +735,118 @@ export const WebResourceAndVideoHub: React.FC<WebResourceAndVideoHubProps> = ({
               />
             </div>
 
+      {/* MODAL 4: EDIT / REPLACE VIDEO OR MATERIAL MODAL */}
+      {editingMaterial && (
+        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
+          <div className={`w-full max-w-lg rounded-xl border p-6 shadow-2xl transition-all ${
+            isDarkMode ? 'bg-[#18181b] border-[#27272a] text-zinc-100' : 'bg-white border-slate-200 text-slate-800'
+          }`}>
+            <div className="flex items-center justify-between pb-3 border-b border-[#27272a] mb-4">
+              <h3 className="font-bold text-sm text-white font-mono uppercase tracking-wider flex items-center gap-2">
+                <RefreshCw className="w-4 h-4 text-amber-400" />
+                Thay Thế Video / Chỉnh Sửa Nội Dung Bài Giảng
+              </h3>
+              <button
+                onClick={() => setEditingMaterial(null)}
+                className="text-zinc-400 hover:text-white font-mono text-xs cursor-pointer"
+              >
+                ✕ Đóng
+              </button>
+            </div>
+
+            <form onSubmit={handleEditSubmit} className="space-y-4 text-xs font-mono">
+              <div>
+                <label className="block text-zinc-400 mb-1">Tên Video / Tài Liệu (*):</label>
+                <input
+                  type="text"
+                  required
+                  value={editTitle}
+                  onChange={(e) => setEditTitle(e.target.value)}
+                  placeholder="VD: Thay thế Video Chuyên đề 12 - Nhiệt Học..."
+                  className="w-full px-3 py-2 rounded bg-[#09090b] border border-[#27272a] text-zinc-200 focus:outline-none focus:border-amber-500"
+                />
+              </div>
+
+              <div>
+                <label className="block text-amber-400 font-bold mb-1">Đường Link Video Mới (YouTube / Vimeo / MP4 / Web Link):</label>
+                <input
+                  type="url"
+                  required
+                  value={editUrl}
+                  onChange={(e) => setEditUrl(e.target.value)}
+                  placeholder="https://www.youtube.com/watch?v=..."
+                  className="w-full px-3 py-2 rounded bg-[#09090b] border border-amber-500/50 text-amber-300 focus:outline-none focus:border-amber-400 font-bold"
+                />
+                <span className="text-[10px] text-zinc-500 mt-1 block">
+                  💡 Dán link video mới để thay thế video cũ bị lỗi hoặc không đạt yêu cầu.
+                </span>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-zinc-400 mb-1">Khối Lớp:</label>
+                  <select
+                    value={editGrade}
+                    onChange={(e) => setEditGrade(Number(e.target.value) as GradeLevel)}
+                    className="w-full px-3 py-2 rounded bg-[#09090b] border border-[#27272a] text-zinc-200 focus:outline-none focus:border-amber-500"
+                  >
+                    <option value={10}>Khối 10</option>
+                    <option value={11}>Khối 11</option>
+                    <option value={12}>Khối 12</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-zinc-400 mb-1">Nguồn / Kênh Video:</label>
+                  <input
+                    type="text"
+                    value={editSiteName}
+                    onChange={(e) => setEditSiteName(e.target.value)}
+                    placeholder="VD: YouTube Physics"
+                    className="w-full px-3 py-2 rounded bg-[#09090b] border border-[#27272a] text-zinc-200 focus:outline-none focus:border-amber-500"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-zinc-400 mb-1">Chuyên Đề Vật Lý:</label>
+                <input
+                  type="text"
+                  value={editTopic}
+                  onChange={(e) => setEditTopic(e.target.value)}
+                  placeholder="VD: Dao động cơ / Vật lý Nhiệt"
+                  className="w-full px-3 py-2 rounded bg-[#09090b] border border-[#27272a] text-zinc-200 focus:outline-none focus:border-amber-500"
+                />
+              </div>
+
+              <div>
+                <label className="block text-zinc-400 mb-1">Mô Tả Lý Do Thay Thế / Ghi Chú Bài Học:</label>
+                <textarea
+                  rows={2}
+                  value={editDesc}
+                  onChange={(e) => setEditDesc(e.target.value)}
+                  placeholder="Nhập mô tả cập nhật mới..."
+                  className="w-full px-3 py-2 rounded bg-[#09090b] border border-[#27272a] text-zinc-200 focus:outline-none focus:border-amber-500"
+                />
+              </div>
+
+              <div className="flex items-center justify-end gap-3 pt-3 border-t border-[#27272a]">
+                <button
+                  type="button"
+                  onClick={() => setEditingMaterial(null)}
+                  className="px-4 py-2 rounded bg-zinc-800 hover:bg-zinc-700 text-zinc-300"
+                >
+                  Hủy Bỏ
+                </button>
+                <button
+                  type="submit"
+                  className="px-5 py-2 rounded bg-amber-600 hover:bg-amber-500 text-white font-bold shadow-lg flex items-center gap-1.5 cursor-pointer"
+                >
+                  <RefreshCw className="w-4 h-4" />
+                  <span>Cập Nhật Thay Thế Video</span>
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}
