@@ -143,7 +143,7 @@ export default function App() {
       isDarkMode ? 'bg-[#0c0c0e] text-zinc-100' : 'bg-[#f8fafc] text-slate-800'
     }`}>
       
-      {/* Top Application Navigation Bar */}
+      {/* Top Portal Navigation Bar (HCM-EDU Style) */}
       <Navbar
         role={role}
         onToggleRole={() => setRole(role === 'TEACHER' ? 'STUDENT' : 'TEACHER')}
@@ -161,332 +161,360 @@ export default function App() {
         onOpenProfileEdit={() => setShowProfileEditModal(true)}
         onOpenApiKeyModal={() => setShowApiKeyModal(true)}
         isDbConnected={dbConfig.status === 'CONNECTED'}
+        activeTab={activeTab}
+        onSelectTab={setActiveTab}
+        onOpenQuizGame={() => setShowQuizGameModal(true)}
+        onOpenAITutor={() => setShowAITutorModal(true)}
+        onOpenAISolver={() => setShowAISolverModal(true)}
       />
 
-      {/* 3-ROW VERTICAL NAVIGATION ARCHITECTURE (FITS WITHIN 1 PAGE WIDTH) */}
-      <div className={`border-b sticky top-18 z-40 space-y-2.5 py-3 ${
-        isDarkMode ? 'bg-[#0c0c0e]/95 border-[#27272a] backdrop-blur-md' : 'bg-white/95 border-slate-200/90 backdrop-blur-md shadow-xs'
-      }`}>
-        
-        {/* ROW 2: LMS CORE & CONTENT HUBS */}
-        <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-12 flex flex-wrap items-center gap-2.5 sm:gap-3 text-sm font-sans">
-          <span className="text-xs font-mono font-bold uppercase text-slate-400 tracking-wider shrink-0 mr-1">
-            Học Tập:
-          </span>
+      {/* Main Portal Body (3-Column Layout: Left Category | Main Area | Right Highlights) */}
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+          
+          {/* CỘT TRÁI (LEFT SIDEBAR) - DANH MỤC CHỨC NĂNG CHUẨN PORTAL SỞ GD&ĐT */}
+          <div className="lg:col-span-3 space-y-4">
+            
+            <div className={`rounded-md border overflow-hidden shadow-xs ${
+              isDarkMode ? 'bg-[#0f172a] border-slate-800' : 'bg-white border-slate-200'
+            }`}>
+              
+              {/* Header Cột Trái với gạch đỏ chỉ thị chuẩn Portal */}
+              <div className={`p-3.5 border-b flex items-center gap-2 font-bold text-sm uppercase tracking-wide ${
+                isDarkMode ? 'border-slate-800 text-slate-100 bg-slate-900' : 'border-slate-200 text-slate-900 bg-slate-50'
+              }`}>
+                <span className="w-1.5 h-4 bg-[#cb1c24] rounded-full inline-block" />
+                <span className="text-[#cb1c24] font-extrabold">DANH MỤC</span> CHỨC NĂNG
+              </div>
 
-          <button
-            onClick={() => setActiveTab('DASHBOARD')}
-            className={`flex items-center gap-2 px-3.5 sm:px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer ${
-              activeTab === 'DASHBOARD'
-                ? (isDarkMode ? 'bg-[#18181b] text-emerald-400 border border-emerald-500/50 shadow-sm' : 'bg-teal-700 text-white shadow-sm')
-                : (isDarkMode ? 'text-zinc-300 hover:text-white bg-[#18181b]/60 border border-[#27272a]' : 'text-slate-700 bg-slate-100 hover:bg-slate-200 border border-slate-200')
-            }`}
-          >
-            <LayoutDashboard className="w-4 h-4 shrink-0" />
-            <span>{role === 'TEACHER' ? 'LMS Core Engine' : 'Lộ Trình Cá Nhân'}</span>
-          </button>
+              {/* Menu Danh Mục Dọc Accordion Style */}
+              <div className="divide-y divide-slate-100 dark:divide-slate-800 text-xs font-semibold">
+                
+                <button
+                  onClick={() => setActiveTab('DASHBOARD')}
+                  className={`w-full text-left p-3 flex items-center justify-between transition-colors cursor-pointer ${
+                    activeTab === 'DASHBOARD'
+                      ? 'bg-rose-50 dark:bg-rose-950/40 text-[#cb1c24] font-extrabold border-l-4 border-[#cb1c24]'
+                      : 'hover:bg-slate-50 dark:hover:bg-slate-800/60 text-slate-700 dark:text-slate-300'
+                  }`}
+                >
+                  <span>CHUYỂN ĐỔI SỐ GIÁO DỤC</span>
+                  <span className="text-slate-400">›</span>
+                </button>
 
-          {/* Global Topic & Media Search Tab */}
-          <button
-            onClick={() => setActiveTab('TOPIC_SEARCH')}
-            className={`flex items-center gap-2 px-3.5 sm:px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer ${
-              activeTab === 'TOPIC_SEARCH'
-                ? (isDarkMode ? 'bg-emerald-600 text-white border border-emerald-400 shadow-md' : 'bg-emerald-600 text-white shadow-sm')
-                : (isDarkMode ? 'text-emerald-400 bg-emerald-500/10 border border-emerald-500/30' : 'text-emerald-800 bg-emerald-50 border border-emerald-200 hover:bg-emerald-100')
-            }`}
-          >
-            <Search className="w-4 h-4 shrink-0" />
-            <span>🔍 Tra Cứu Bài Học 4-in-1</span>
-          </button>
+                <button
+                  onClick={() => setActiveTab('TOPIC_SEARCH')}
+                  className={`w-full text-left p-3 flex items-center justify-between transition-colors cursor-pointer ${
+                    activeTab === 'TOPIC_SEARCH'
+                      ? 'bg-rose-50 dark:bg-rose-950/40 text-[#cb1c24] font-extrabold border-l-4 border-[#cb1c24]'
+                      : 'hover:bg-slate-50 dark:hover:bg-slate-800/60 text-slate-700 dark:text-slate-300'
+                  }`}
+                >
+                  <span>CT PHỔ THÔNG 2018 - THPT VẬT LÍ</span>
+                  <span className="text-slate-400">›</span>
+                </button>
 
-          {/* Web Resources & Embedded Videos Tab */}
-          <button
-            onClick={() => setActiveTab('WEB_RESOURCES')}
-            className={`flex items-center gap-2 px-3.5 sm:px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer ${
-              activeTab === 'WEB_RESOURCES'
-                ? (isDarkMode ? 'bg-rose-600 text-white border border-rose-400 shadow-md' : 'bg-rose-600 text-white shadow-sm')
-                : (isDarkMode ? 'text-rose-400 bg-rose-500/10 border border-rose-500/30' : 'text-rose-800 bg-rose-50 border border-rose-200 hover:bg-rose-100')
-            }`}
-          >
-            <Video className="w-4 h-4 shrink-0 fill-current" />
-            <span>📺 Kho Video & Tài Liệu Mạng</span>
-          </button>
+                <button
+                  onClick={() => setActiveTab('WEB_RESOURCES')}
+                  className={`w-full text-left p-3 flex items-center justify-between transition-colors cursor-pointer ${
+                    activeTab === 'WEB_RESOURCES'
+                      ? 'bg-rose-50 dark:bg-rose-950/40 text-[#cb1c24] font-extrabold border-l-4 border-[#cb1c24]'
+                      : 'hover:bg-slate-50 dark:hover:bg-slate-800/60 text-slate-700 dark:text-slate-300'
+                  }`}
+                >
+                  <span>KHO VIDEO & TÀI LIỆU MẠNG</span>
+                  <span className="text-slate-400">›</span>
+                </button>
 
-          {/* Honor Roll Tab */}
-          <button
-            onClick={() => setActiveTab('HONOR')}
-            className={`flex items-center gap-2 px-3.5 sm:px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer ${
-              activeTab === 'HONOR'
-                ? 'bg-gradient-to-r from-amber-500 to-yellow-500 text-slate-900 border border-amber-300 shadow-sm'
-                : (isDarkMode ? 'text-amber-400 bg-amber-500/10 border border-amber-500/30' : 'text-amber-800 bg-amber-50 border border-amber-200 hover:bg-amber-100')
-            }`}
-          >
-            <Trophy className={`w-4 h-4 shrink-0 ${activeTab === 'HONOR' ? 'text-slate-900 fill-slate-900' : 'fill-current'}`} />
-            <span>🏆 Vinh Danh Tiêu Biểu ({awards.length})</span>
-          </button>
+                <button
+                  onClick={() => setActiveTab('LAB')}
+                  className={`w-full text-left p-3 flex items-center justify-between transition-colors cursor-pointer ${
+                    activeTab === 'LAB'
+                      ? 'bg-rose-50 dark:bg-rose-950/40 text-[#cb1c24] font-extrabold border-l-4 border-[#cb1c24]'
+                      : 'hover:bg-slate-50 dark:hover:bg-slate-800/60 text-slate-700 dark:text-slate-300'
+                  }`}
+                >
+                  <span>PHÒNG THÍ NGHIỆM ẢO LMS360</span>
+                  <span className="text-slate-400">›</span>
+                </button>
 
-          <button
-            onClick={() => setActiveTab('OCR')}
-            className={`flex items-center gap-2 px-3.5 sm:px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer ${
-              activeTab === 'OCR'
-                ? (isDarkMode ? 'bg-[#18181b] text-emerald-400 border border-emerald-500/50 shadow-sm' : 'bg-teal-700 text-white shadow-sm')
-                : (isDarkMode ? 'text-zinc-300 hover:text-white bg-[#18181b]/60 border border-[#27272a]' : 'text-slate-700 bg-slate-100 hover:bg-slate-200 border border-slate-200')
-            }`}
-          >
-            <Camera className="w-4 h-4 shrink-0" />
-            <span>Smart Grading (OCR)</span>
-          </button>
+                <button
+                  onClick={() => setShowQuizGameModal(true)}
+                  className="w-full text-left p-3 flex items-center justify-between hover:bg-slate-50 dark:hover:bg-slate-800/60 text-[#cb1c24] font-bold cursor-pointer"
+                >
+                  <span>MINIGAME 1V1 & SPEED RUN</span>
+                  <span className="text-rose-500">⚡</span>
+                </button>
 
-          <button
-            onClick={() => setActiveTab('LAB')}
-            className={`flex items-center gap-2 px-3.5 sm:px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer ${
-              activeTab === 'LAB'
-                ? (isDarkMode ? 'bg-[#18181b] text-emerald-400 border border-emerald-500/50 shadow-sm' : 'bg-teal-700 text-white shadow-sm')
-                : (isDarkMode ? 'text-zinc-300 hover:text-white bg-[#18181b]/60 border border-[#27272a]' : 'text-slate-700 bg-slate-100 hover:bg-slate-200 border border-slate-200')
-            }`}
-          >
-            <Activity className="w-4 h-4 shrink-0" />
-            <span>Phòng Thí Nghiệm Ảo</span>
-          </button>
+                <button
+                  onClick={() => setShowAITutorModal(true)}
+                  className="w-full text-left p-3 flex items-center justify-between hover:bg-slate-50 dark:hover:bg-slate-800/60 text-emerald-600 font-bold cursor-pointer"
+                >
+                  <span>AI PHYSICS TUTOR 24/7</span>
+                  <span className="text-emerald-500">🤖</span>
+                </button>
 
-          <button
-            onClick={() => setActiveTab('BANK')}
-            className={`flex items-center gap-2 px-3.5 sm:px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer ${
-              activeTab === 'BANK'
-                ? (isDarkMode ? 'bg-[#18181b] text-emerald-400 border border-emerald-500/50 shadow-sm' : 'bg-teal-700 text-white shadow-sm')
-                : (isDarkMode ? 'text-zinc-300 hover:text-white bg-[#18181b]/60 border border-[#27272a]' : 'text-slate-700 bg-slate-100 hover:bg-slate-200 border border-slate-200')
-            }`}
-          >
-            <BookOpen className="w-4 h-4 shrink-0" />
-            <span>Ngân Hàng Câu Hỏi GDPT</span>
-          </button>
+                <button
+                  onClick={() => setShowAISolverModal(true)}
+                  className="w-full text-left p-3 flex items-center justify-between hover:bg-slate-50 dark:hover:bg-slate-800/60 text-purple-600 font-bold cursor-pointer"
+                >
+                  <span>AI GIẢI BÀI & RÚT BÀI HỌC</span>
+                  <span className="text-purple-500">🧠</span>
+                </button>
+
+                {role === 'TEACHER' && (
+                  <>
+                    <button
+                      onClick={() => setActiveTab('STUDENT_MGMT')}
+                      className={`w-full text-left p-3 flex items-center justify-between transition-colors cursor-pointer ${
+                        activeTab === 'STUDENT_MGMT'
+                          ? 'bg-rose-50 dark:bg-rose-950/40 text-[#cb1c24] font-extrabold border-l-4 border-[#cb1c24]'
+                          : 'hover:bg-slate-50 dark:hover:bg-slate-800/60 text-slate-700 dark:text-slate-300'
+                      }`}
+                    >
+                      <span>QUẢN LÝ HỌC SINH ({students.length})</span>
+                      <span className="text-slate-400">›</span>
+                    </button>
+
+                    <button
+                      onClick={() => setActiveTab('COLLABORATION')}
+                      className={`w-full text-left p-3 flex items-center justify-between transition-colors cursor-pointer ${
+                        activeTab === 'COLLABORATION'
+                          ? 'bg-rose-50 dark:bg-rose-950/40 text-[#cb1c24] font-extrabold border-l-4 border-[#cb1c24]'
+                          : 'hover:bg-slate-50 dark:hover:bg-slate-800/60 text-slate-700 dark:text-slate-300'
+                      }`}
+                    >
+                      <span>PHÂN QUYỀN ĐỒNG NGHIỆP</span>
+                      <span className="text-slate-400">›</span>
+                    </button>
+                  </>
+                )}
+
+              </div>
+            </div>
+
+            {/* Quick Status Card */}
+            <div className={`p-4 rounded-md border text-xs space-y-2 ${
+              isDarkMode ? 'bg-[#0f172a] border-slate-800 text-slate-300' : 'bg-slate-50 border-slate-200 text-slate-700'
+            }`}>
+              <div className="flex items-center gap-2 font-bold text-sky-700 dark:text-sky-400">
+                <Database className="w-4 h-4" />
+                <span>TRẠNG THÁI HỆ THỐNG</span>
+              </div>
+              <p className="text-[11px] leading-relaxed">
+                • Mã phòng: <span className="font-bold text-[#cb1c24]">{activeClass.code}</span><br />
+                • Đã kết nối DB: <span className="font-bold text-emerald-600">THÀNH CÔNG</span><br />
+                • Học sinh online: <span className="font-bold text-sky-600">{students.length} em</span>
+              </p>
+            </div>
+
+          </div>
+
+          {/* CỘT GIỮA (CENTER CONTENT AREA - 6 COLS) */}
+          <div className="lg:col-span-6 space-y-6">
+            {activeTab === 'DASHBOARD' && (
+              role === 'TEACHER' ? (
+                <TeacherDashboard
+                  isDarkMode={isDarkMode}
+                  activeClass={activeClass}
+                  submissions={submissions}
+                  onOpenOCR={() => setActiveTab('OCR')}
+                  onOpenExportModal={() => setShowExportModal(true)}
+                  onOpenCollaboration={() => setActiveTab('COLLABORATION')}
+                  onOpenHonorRoll={() => setActiveTab('HONOR')}
+                />
+              ) : (
+                <StudentDashboard
+                  isDarkMode={isDarkMode}
+                  student={student}
+                  questions={questions}
+                  assignedTasks={tasks}
+                  materials={materials}
+                  submissions={submissions}
+                  onCompleteTask={handleCompleteStudentTask}
+                  onOpenHonorRoll={() => setActiveTab('HONOR')}
+                />
+              )
+            )}
+
+            {activeTab === 'TOPIC_SEARCH' && (
+              <TopicMediaSearchHub
+                isDarkMode={isDarkMode}
+                materials={materials}
+                questions={questions}
+              />
+            )}
+
+            {activeTab === 'WEB_RESOURCES' && (
+              <WebResourceAndVideoHub
+                isDarkMode={isDarkMode}
+                materials={materials}
+                currentTeacher={currentTeacher}
+                onAddMaterial={handleAddMaterial}
+                onDeleteMaterial={handleDeleteMaterial}
+                onAssignTask={(mat) => {
+                  handleAddTask({
+                    id: `task_${Date.now()}`,
+                    title: `Giao học liệu video/web: ${mat.title}`,
+                    materialId: mat.id,
+                    materialTitle: mat.title,
+                    assignedByTeacherName: currentTeacher.name,
+                    assignedByTeacherId: currentTeacher.id,
+                    targetClassCode: activeClass.code,
+                    dueDate: '2026-08-15 23:59',
+                    note: 'Vui lòng xem kỹ video / bài đọc và ghi chép kiến thức trọng tâm.',
+                    status: 'OPEN',
+                    createdAt: new Date().toISOString().replace('T', ' ').substring(0, 16)
+                  });
+                  alert(`Đã giao tài liệu "${mat.title}" cho lớp ${activeClass.code}!`);
+                }}
+              />
+            )}
+
+            {activeTab === 'HONOR' && (
+              <StudentHonorRoll
+                isDarkMode={isDarkMode}
+                role={role}
+                awards={awards}
+                students={students}
+                classList={classList}
+                activeClass={activeClass}
+                onAddAward={handleAddAward}
+                onDeleteAward={handleDeleteAward}
+              />
+            )}
+
+            {activeTab === 'STUDENT_MGMT' && role === 'TEACHER' && (
+              <StudentManagement
+                isDarkMode={isDarkMode}
+                students={students}
+                classList={classList}
+                colleagues={colleagues}
+                submissions={submissions}
+                materials={materials}
+                questions={questions}
+                onAddStudent={handleAddStudent}
+                onUpdateStudent={handleUpdateStudent}
+                onDeleteStudent={handleDeleteStudent}
+                onSelectStudentForLogin={handleSelectStudentForLogin}
+                onAssignTask={handleAddTask}
+                onOpenOnlineDb={() => setShowOnlineDbModal(true)}
+              />
+            )}
+
+            {activeTab === 'COLLABORATION' && role === 'TEACHER' && (
+              <TeacherCollaboration
+                isDarkMode={isDarkMode}
+                classList={classList}
+                colleagues={colleagues}
+                materials={materials}
+                tasks={tasks}
+                currentTeacher={currentTeacher}
+                onSelectTeacher={setCurrentTeacher}
+                onAddColleague={handleAddColleague}
+                onUpdatePermissions={handleUpdatePermissions}
+                onAddMaterial={handleAddMaterial}
+                onDeleteMaterial={handleDeleteMaterial}
+                onAddTask={handleAddTask}
+              />
+            )}
+
+            {activeTab === 'OCR' && (
+              <SmartGradingOCR
+                isDarkMode={isDarkMode}
+                questions={questions}
+                submissions={submissions}
+                onSubmissionGraded={handleSubmissionGraded}
+              />
+            )}
+
+            {activeTab === 'LAB' && (
+              <PhysicsSimulations isDarkMode={isDarkMode} />
+            )}
+
+            {activeTab === 'ANALYTICS' && (
+              <PhysicsAnalyticsDashboard
+                isDarkMode={isDarkMode}
+                students={students}
+                submissions={submissions}
+                classList={classList}
+              />
+            )}
+
+            {activeTab === 'BANK' && (
+              <QuestionBank
+                isDarkMode={isDarkMode}
+                questions={questions}
+                onAddQuestion={handleAddQuestion}
+                onAddMultipleQuestions={handleAddMultipleQuestions}
+              />
+            )}
+          </div>
+
+          {/* CỘT PHẢI (RIGHT SIDEBAR) - TIÊU ĐIỂM & VINH DANH CHUẨN PORTAL */}
+          <div className="lg:col-span-3 space-y-4">
+            
+            <div className={`rounded-md border overflow-hidden shadow-xs ${
+              isDarkMode ? 'bg-[#0f172a] border-slate-800' : 'bg-white border-slate-200'
+            }`}>
+              
+              {/* Header Cột Phải */}
+              <div className={`p-3.5 border-b flex items-center gap-2 font-bold text-sm uppercase tracking-wide ${
+                isDarkMode ? 'border-slate-800 text-slate-100 bg-slate-900' : 'border-slate-200 text-slate-900 bg-slate-50'
+              }`}>
+                <span className="w-1.5 h-4 bg-[#cb1c24] rounded-full inline-block" />
+                <span className="text-[#cb1c24] font-extrabold">TIÊU ĐIỂM</span> & THÔNG BÁO
+              </div>
+
+              {/* List of News & Honor Roll Highlights */}
+              <div className="p-3.5 space-y-3.5 text-xs">
+                
+                <div className="border-b border-slate-100 dark:border-slate-800 pb-3 space-y-1">
+                  <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-rose-100 text-[#cb1c24] dark:bg-rose-950 dark:text-rose-300">
+                    THÔNG BÁO TỪ SỞ GD&ĐT
+                  </span>
+                  <h4 className="font-bold text-slate-900 dark:text-slate-100 hover:text-[#cb1c24] cursor-pointer leading-snug">
+                    Hướng dẫn thực hiện chương trình GDPT 2018 môn Vật lý năm học 2026 - 2027
+                  </h4>
+                  <p className="text-[11px] text-slate-500 line-clamp-2">
+                    Áp dụng ma trận đề thi 4 mức độ tư duy: Nhận biết, Thông hiểu, Vận dụng và Vận dụng cao.
+                  </p>
+                </div>
+
+                <div className="border-b border-slate-100 dark:border-slate-800 pb-3 space-y-1">
+                  <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300">
+                    🏆 VINH DANH TOP HỌC SINH
+                  </span>
+                  <h4 className="font-bold text-slate-900 dark:text-slate-100 leading-snug">
+                    Vinh danh em Nguyễn Văn Đức đạt điểm 10 tuyệt đối môn Vật lý
+                  </h4>
+                  <p className="text-[11px] text-slate-500">
+                    Lớp 12A1 • Hoàn thành xuất sắc bộ 50 câu hỏi ôn thi GDPT.
+                  </p>
+                </div>
+
+                <div className="space-y-1">
+                  <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-sky-100 text-sky-800 dark:bg-sky-950 dark:text-sky-300">
+                    🤖 AI GAP ALERT
+                  </span>
+                  <h4 className="font-bold text-slate-900 dark:text-slate-100 leading-snug">
+                    Phát hiện 03 học sinh cần bổ trợ phần Dao động điều hòa
+                  </h4>
+                  <button
+                    onClick={() => setActiveTab('DASHBOARD')}
+                    className="w-full py-1.5 rounded text-[11px] font-bold bg-[#cb1c24] hover:bg-[#b91c1c] text-white transition-colors cursor-pointer mt-1"
+                  >
+                    🚀 Xem Báo Cáo AI Chi Tiết
+                  </button>
+                </div>
+
+              </div>
+
+            </div>
+
+          </div>
+
         </div>
-
-        {/* ROW 3: AI INTELLIGENCE & MANAGEMENT CONTROLS */}
-        <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-12 flex flex-wrap items-center gap-2.5 sm:gap-3 text-sm font-sans">
-          <span className="text-xs font-mono font-bold uppercase text-slate-400 tracking-wider shrink-0 mr-1">
-            Công Cụ AI & Quản Lý:
-          </span>
-
-          {/* Analytics Radar & Heatmap Tab */}
-          <button
-            onClick={() => setActiveTab('ANALYTICS')}
-            className={`flex items-center gap-2 px-3.5 sm:px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer ${
-              activeTab === 'ANALYTICS'
-                ? (isDarkMode ? 'bg-cyan-600 text-white border border-cyan-400 shadow-md' : 'bg-cyan-600 text-white shadow-sm')
-                : (isDarkMode ? 'text-cyan-400 bg-cyan-500/10 border border-cyan-500/30' : 'text-cyan-800 bg-cyan-50 border border-cyan-200 hover:bg-cyan-100')
-            }`}
-          >
-            <BarChart3 className="w-4 h-4 shrink-0" />
-            <span>📊 Báo Cáo Radar & Heatmap</span>
-          </button>
-
-          {/* Minigame Quiz Trigger */}
-          <button
-            onClick={() => setShowQuizGameModal(true)}
-            className={`flex items-center gap-2 px-3.5 sm:px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer ${
-              isDarkMode ? 'text-amber-400 bg-amber-500/10 border border-amber-500/30' : 'text-amber-800 bg-amber-50 border border-amber-200 hover:bg-amber-100'
-            }`}
-          >
-            <Gamepad2 className="w-4 h-4 shrink-0 animate-bounce" />
-            <span>🎮 Minigame 1v1 & Speed Run</span>
-          </button>
-
-          {/* AI Physics Tutor Trigger */}
-          <button
-            onClick={() => setShowAITutorModal(true)}
-            className={`flex items-center gap-2 px-3.5 sm:px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer ${
-              isDarkMode ? 'text-emerald-400 bg-emerald-500/10 border border-emerald-500/30' : 'text-teal-800 bg-teal-50 border border-teal-200 hover:bg-teal-100'
-            }`}
-          >
-            <BrainCircuit className="w-4 h-4 shrink-0 animate-pulse" />
-            <span>🤖 AI Physics Tutor 24/7</span>
-          </button>
-
-          {/* AI Problem Solver & Diagnostic Advisor Trigger */}
-          <button
-            onClick={() => setShowAISolverModal(true)}
-            className={`flex items-center gap-2 px-3.5 sm:px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer ${
-              isDarkMode ? 'text-purple-400 bg-purple-500/10 border border-purple-500/30' : 'text-purple-800 bg-purple-50 border border-purple-200 hover:bg-purple-100'
-            }`}
-          >
-            <Lightbulb className="w-4 h-4 shrink-0" />
-            <span>🧠 AI Giải Bài & Rút Bài Học</span>
-          </button>
-
-          {role === 'TEACHER' && (
-            <>
-              <button
-                onClick={() => setActiveTab('STUDENT_MGMT')}
-                className={`flex items-center gap-2 px-3.5 sm:px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer ${
-                  activeTab === 'STUDENT_MGMT'
-                    ? (isDarkMode ? 'bg-[#18181b] text-emerald-400 border border-emerald-500/50 shadow-sm font-bold' : 'bg-teal-700 text-white font-bold shadow-sm')
-                    : (isDarkMode ? 'text-zinc-300 hover:text-white bg-[#18181b]/60 border border-[#27272a]' : 'text-slate-700 bg-slate-100 hover:bg-slate-200 border border-slate-200')
-                }`}
-              >
-                <UserPlus className="w-4 h-4 shrink-0" />
-                <span>Quản Lý Học Sinh & Tài Khoản ({students.length})</span>
-              </button>
-
-              <button
-                onClick={() => setActiveTab('COLLABORATION')}
-                className={`flex items-center gap-2 px-3.5 sm:px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer ${
-                  activeTab === 'COLLABORATION'
-                    ? (isDarkMode ? 'bg-[#18181b] text-emerald-400 border border-emerald-500/50 shadow-sm' : 'bg-teal-700 text-white font-bold shadow-sm')
-                    : (isDarkMode ? 'text-zinc-300 hover:text-white bg-[#18181b]/60 border border-[#27272a]' : 'text-slate-700 bg-slate-100 hover:bg-slate-200 border border-slate-200')
-                }`}
-              >
-                <Users className="w-4 h-4 shrink-0" />
-                <span>Phân Quyền & Kho Bài Giảng ({colleagues.length})</span>
-              </button>
-            </>
-          )}
-
-        </div>
-
-      </div>
-
-      {/* Main Container Content */}
-      <main className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-12 py-8 space-y-8">
-        
-        {activeTab === 'DASHBOARD' && (
-          role === 'TEACHER' ? (
-            <TeacherDashboard
-              isDarkMode={isDarkMode}
-              activeClass={activeClass}
-              submissions={submissions}
-              onOpenOCR={() => setActiveTab('OCR')}
-              onOpenExportModal={() => setShowExportModal(true)}
-              onOpenCollaboration={() => setActiveTab('COLLABORATION')}
-              onOpenHonorRoll={() => setActiveTab('HONOR')}
-            />
-          ) : (
-            <StudentDashboard
-              isDarkMode={isDarkMode}
-              student={student}
-              questions={questions}
-              assignedTasks={tasks}
-              materials={materials}
-              submissions={submissions}
-              onCompleteTask={handleCompleteStudentTask}
-              onOpenHonorRoll={() => setActiveTab('HONOR')}
-            />
-          )
-        )}
-
-        {activeTab === 'HONOR' && (
-          <StudentHonorRoll
-            isDarkMode={isDarkMode}
-            role={role}
-            awards={awards}
-            students={students}
-            classList={classList}
-            activeClass={activeClass}
-            onAddAward={handleAddAward}
-            onDeleteAward={handleDeleteAward}
-          />
-        )}
-
-        {activeTab === 'STUDENT_MGMT' && role === 'TEACHER' && (
-          <StudentManagement
-            isDarkMode={isDarkMode}
-            students={students}
-            classList={classList}
-            colleagues={colleagues}
-            submissions={submissions}
-            materials={materials}
-            questions={questions}
-            onAddStudent={handleAddStudent}
-            onUpdateStudent={handleUpdateStudent}
-            onDeleteStudent={handleDeleteStudent}
-            onSelectStudentForLogin={handleSelectStudentForLogin}
-            onAssignTask={handleAddTask}
-            onOpenOnlineDb={() => setShowOnlineDbModal(true)}
-          />
-        )}
-
-        {activeTab === 'WEB_RESOURCES' && (
-          <WebResourceAndVideoHub
-            isDarkMode={isDarkMode}
-            materials={materials}
-            currentTeacher={currentTeacher}
-            onAddMaterial={handleAddMaterial}
-            onDeleteMaterial={handleDeleteMaterial}
-            onAssignTask={(mat) => {
-              handleAddTask({
-                id: `task_${Date.now()}`,
-                title: `Giao học liệu video/web: ${mat.title}`,
-                materialId: mat.id,
-                materialTitle: mat.title,
-                assignedByTeacherName: currentTeacher.name,
-                assignedByTeacherId: currentTeacher.id,
-                targetClassCode: activeClass.code,
-                dueDate: '2026-08-15 23:59',
-                note: 'Vui lòng xem kỹ video / bài đọc và ghi chép kiến thức trọng tâm.',
-                status: 'OPEN',
-                createdAt: new Date().toISOString().replace('T', ' ').substring(0, 16)
-              });
-              alert(`Đã giao tài liệu "${mat.title}" cho lớp ${activeClass.code}!`);
-            }}
-          />
-        )}
-
-        {activeTab === 'COLLABORATION' && role === 'TEACHER' && (
-          <TeacherCollaboration
-            isDarkMode={isDarkMode}
-            classList={classList}
-            colleagues={colleagues}
-            materials={materials}
-            tasks={tasks}
-            currentTeacher={currentTeacher}
-            onSelectTeacher={setCurrentTeacher}
-            onAddColleague={handleAddColleague}
-            onUpdatePermissions={handleUpdatePermissions}
-            onAddMaterial={handleAddMaterial}
-            onDeleteMaterial={handleDeleteMaterial}
-            onAddTask={handleAddTask}
-          />
-        )}
-
-        {activeTab === 'OCR' && (
-          <SmartGradingOCR
-            isDarkMode={isDarkMode}
-            questions={questions}
-            submissions={submissions}
-            onSubmissionGraded={handleSubmissionGraded}
-          />
-        )}
-
-        {activeTab === 'LAB' && (
-          <PhysicsSimulations isDarkMode={isDarkMode} />
-        )}
-
-        {activeTab === 'BANK' && (
-          <QuestionBank
-            isDarkMode={isDarkMode}
-            questions={questions}
-            onAddQuestion={handleAddQuestion}
-            onAddMultipleQuestions={handleAddMultipleQuestions}
-          />
-        )}
-
-        {activeTab === 'ANALYTICS' && (
-          <PhysicsAnalyticsDashboard
-            isDarkMode={isDarkMode}
-            students={students}
-            submissions={submissions}
-            classList={classList}
-          />
-        )}
-
-        {activeTab === 'TOPIC_SEARCH' && (
-          <TopicMediaSearchHub
-            isDarkMode={isDarkMode}
-            materials={materials}
-            questions={questions}
-          />
-        )}
-
       </main>
 
       {/* Student Authentication Modal */}
