@@ -10,6 +10,63 @@ interface SmartGradingOCRProps {
   onSubmissionGraded: (submission: SubmissionResult) => void;
 }
 
+// Helper to generate full 3-part GDPT 2018 Physics exam key structure (18 MCQ + 4 T/F + 6 Short Answer)
+const generateFullGDPT2018ExamKey = (code: string, customTitle?: string): ExamCodeKey => {
+  const part1 = Array.from({ length: 18 }, (_, idx) => ({
+    questionNumber: idx + 1,
+    type: 'MCQ_4' as const,
+    correctAnswer: ['A', 'B', 'C', 'D'][idx % 4]
+  }));
+
+  const part2Defaults = [
+    'a-Đ, b-S, c-Đ, d-S',
+    'a-S, b-Đ, c-Đ, d-S',
+    'a-Đ, b-Đ, c-S, d-S',
+    'a-S, b-S, c-Đ, d-Đ'
+  ];
+  const part2 = part2Defaults.map((ans, idx) => ({
+    questionNumber: idx + 1,
+    type: 'TRUE_FALSE_4' as const,
+    correctAnswer: ans
+  }));
+
+  const part3Defaults = ['2.5', '-4.2', '100', '0.75', '12.8', '50'];
+  const part3 = part3Defaults.map((ans, idx) => ({
+    questionNumber: idx + 1,
+    type: 'SHORT_ANSWER' as const,
+    correctAnswer: ans
+  }));
+
+  return {
+    code,
+    title: customTitle || `Đề Thi Vật Lý THPT - Mã Đề ${code} (Chuẩn GDPT 2018 - 3 Phần)`,
+    answers: [...part1, ...part2, ...part3]
+  };
+};
+
+// Helper to parse True/False sub-item status (a, b, c, d)
+const parseTrueFalseObj = (raw: string) => {
+  const defaults = { a: 'Đ', b: 'S', c: 'Đ', d: 'S' };
+  if (!raw) return defaults;
+  const matchA = raw.match(/a[:\-\s]*([ĐSSTFđsstf])/i);
+  const matchB = raw.match(/b[:\-\s]*([ĐSSTFđsstf])/i);
+  const matchC = raw.match(/c[:\-\s]*([ĐSSTFđsstf])/i);
+  const matchD = raw.match(/d[:\-\s]*([ĐSSTFđsstf])/i);
+
+  const normalize = (v?: string) => {
+    if (!v) return 'Đ';
+    const upper = v.toUpperCase();
+    return (upper === 'S' || upper === 'F') ? 'S' : 'Đ';
+  };
+
+  return {
+    a: normalize(matchA?.[1]),
+    b: normalize(matchB?.[1]),
+    c: normalize(matchC?.[1]),
+    d: normalize(matchD?.[1])
+  };
+};
+
 export const SmartGradingOCR: React.FC<SmartGradingOCRProps> = ({
   isDarkMode,
   questions,
@@ -37,30 +94,12 @@ export const SmartGradingOCR: React.FC<SmartGradingOCRProps> = ({
   const [syncStatusMsg, setSyncStatusMsg] = useState<string | null>(null);
   const [copiedSheets, setCopiedSheets] = useState<boolean>(false);
 
-  // Default Answer Keys Management (Mã đề 101, 102, 103)
+  // Default Answer Keys Management - Prepared strictly with 3 Parts GDPT 2018
   const [examKeys, setExamKeys] = useState<ExamCodeKey[]>([
-    {
-      code: '101',
-      title: 'Đề Thi Vật Lý Lớp 12 - Mã Đề 101',
-      answers: [
-        { questionNumber: 1, type: 'MCQ_4', correctAnswer: 'B' },
-        { questionNumber: 2, type: 'MCQ_4', correctAnswer: 'A' },
-        { questionNumber: 3, type: 'TRUE_FALSE_4', correctAnswer: 'a-Đ, b-S, c-Đ, d-Đ' },
-        { questionNumber: 4, type: 'SHORT_ANSWER', correctAnswer: '2.5 Pa' },
-        { questionNumber: 5, type: 'MCQ_4', correctAnswer: 'C' }
-      ]
-    },
-    {
-      code: '102',
-      title: 'Đề Thi Vật Lý Lớp 12 - Mã Đề 102',
-      answers: [
-        { questionNumber: 1, type: 'MCQ_4', correctAnswer: 'C' },
-        { questionNumber: 2, type: 'MCQ_4', correctAnswer: 'D' },
-        { questionNumber: 3, type: 'TRUE_FALSE_4', correctAnswer: 'a-S, b-Đ, c-Đ, d-S' },
-        { questionNumber: 4, type: 'SHORT_ANSWER', correctAnswer: '1.2 cm' },
-        { questionNumber: 5, type: 'MCQ_4', correctAnswer: 'A' }
-      ]
-    }
+    generateFullGDPT2018ExamKey('101'),
+    generateFullGDPT2018ExamKey('102'),
+    generateFullGDPT2018ExamKey('103'),
+    generateFullGDPT2018ExamKey('104')
   ]);
 
   // Fast string input helper for Answer Key
@@ -268,33 +307,62 @@ export const SmartGradingOCR: React.FC<SmartGradingOCRProps> = ({
     }
   };
 
-  // Fast Update Answer Option for selected Exam Code
-  const handleUpdateOption = (examCode: string, qNum: number, newAns: string) => {
+  // Fast Update Answer Option for selected Exam Code and Question Type
+  const handleUpdateOption = (
+    examCode: string,
+    qNum: number,
+    newAns: string,
+    type: 'MCQ_4' | 'TRUE_FALSE_4' | 'SHORT_ANSWER' = 'MCQ_4'
+  ) => {
     setExamKeys(prev => prev.map(key => {
       if (key.code !== examCode) return key;
       return {
         ...key,
-        answers: key.answers.map(ans => ans.questionNumber === qNum ? { ...ans, correctAnswer: newAns } : ans)
+        answers: key.answers.map(ans => (ans.questionNumber === qNum && ans.type === type) ? { ...ans, correctAnswer: newAns } : ans)
       };
     }));
   };
 
-  // Add new Exam Code
+  // Toggle True / False Sub Item (a, b, c, d)
+  const handleToggleTrueFalseSubItem = (
+    examCode: string,
+    qNum: number,
+    subItem: 'a' | 'b' | 'c' | 'd',
+    newVal: 'Đ' | 'S'
+  ) => {
+    setExamKeys(prev => prev.map(k => {
+      if (k.code !== examCode) return k;
+      return {
+        ...k,
+        answers: k.answers.map(ans => {
+          if (ans.type === 'TRUE_FALSE_4' && ans.questionNumber === qNum) {
+            const currentObj = parseTrueFalseObj(ans.correctAnswer);
+            currentObj[subItem] = newVal;
+            const updatedStr = `a-${currentObj.a}, b-${currentObj.b}, c-${currentObj.c}, d-${currentObj.d}`;
+            return { ...ans, correctAnswer: updatedStr };
+          }
+          return ans;
+        })
+      };
+    }));
+  };
+
+  // Add new Exam Code with complete 3-Part GDPT 2018 format
   const handleAddNewExamCode = () => {
     const nextCode = (100 + examKeys.length + 1).toString();
-    const newKey: ExamCodeKey = {
-      code: nextCode,
-      title: `Đề Thi Vật Lý Lớp 12 - Mã Đề ${nextCode}`,
-      answers: [
-        { questionNumber: 1, type: 'MCQ_4', correctAnswer: 'A' },
-        { questionNumber: 2, type: 'MCQ_4', correctAnswer: 'B' },
-        { questionNumber: 3, type: 'MCQ_4', correctAnswer: 'C' },
-        { questionNumber: 4, type: 'MCQ_4', correctAnswer: 'D' },
-        { questionNumber: 5, type: 'MCQ_4', correctAnswer: 'A' }
-      ]
-    };
-    setExamKeys([...examKeys, newKey]);
+    const newKey = generateFullGDPT2018ExamKey(nextCode);
+    setExamKeys(prev => [...prev, newKey]);
     setSelectedExamCode(nextCode);
+    alert(`✓ Đã tạo thành công Mã Đề ${nextCode} với cấu trúc đầy đủ 3 phần theo chuẩn GDPT 2018 của Bộ GD&ĐT!`);
+  };
+
+  // Reset or regenerate full 3-part key structure for selected exam code
+  const handleResetToFullGDPT2018Key = (examCode: string) => {
+    setExamKeys(prev => prev.map(k => {
+      if (k.code !== examCode) return k;
+      return generateFullGDPT2018ExamKey(examCode, k.title);
+    }));
+    alert(`✓ Đã tạo mới/khôi phục đủ 3 phần GDPT 2018 cho Mã Đề ${examCode}!`);
   };
 
   // Copy Submissions Table for Google Sheets
@@ -772,60 +840,65 @@ export const SmartGradingOCR: React.FC<SmartGradingOCRProps> = ({
             ))}
           </div>
 
-          {/* Answer Key Table Editor for Selected Exam Code */}
+          {/* Answer Key Table Editor for Selected Exam Code - Chuẩn 3 Phần Bộ GD&ĐT GDPT 2018 */}
           {(() => {
             const currentKey = examKeys.find(k => k.code === selectedExamCode) || examKeys[0];
+
+            // Group answers by 3 Parts
+            const part1Answers = currentKey.answers.filter(a => a.type === 'MCQ_4');
+            const part2Answers = currentKey.answers.filter(a => a.type === 'TRUE_FALSE_4');
+            const part3Answers = currentKey.answers.filter(a => a.type === 'SHORT_ANSWER');
+
             return (
-              <div className="p-5 rounded-lg border border-[#27272a] bg-[#09090b] space-y-4">
+              <div className="p-5 rounded-lg border border-[#27272a] bg-[#09090b] space-y-6">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-[#27272a] pb-3">
                   <div>
-                    <h4 className="font-bold text-sm text-emerald-400 font-mono">
-                      Bảng Đáp Án Chuẩn: {currentKey.title}
+                    <h4 className="font-bold text-sm text-emerald-400 font-mono flex items-center gap-2">
+                      <span>Bảng Đáp Án Chuẩn Bộ GD&ĐT: {currentKey.title}</span>
                     </h4>
-                    <span className="text-[11px] text-zinc-400">
-                      Mã đề: <strong className="text-white">{currentKey.code}</strong> • Số lượng câu: <strong className="text-white">{currentKey.answers.length}</strong>
+                    <span className="text-[11px] text-zinc-400 font-mono">
+                      Mã đề: <strong className="text-white">{currentKey.code}</strong> • Tổng số câu: <strong className="text-white">{currentKey.answers.length} câu</strong> (Đủ 3 Phần Chuẩn GDPT 2018: 18 MCQ + 4 D/S + 6 Trả lời ngắn)
                     </span>
                   </div>
 
                   <button
-                    onClick={() => {
-                      // Add new question line to current key
-                      setExamKeys(prev => prev.map(k => {
-                        if (k.code !== currentKey.code) return k;
-                        const nextNum = k.answers.length + 1;
-                        return {
-                          ...k,
-                          answers: [...k.answers, { questionNumber: nextNum, type: 'MCQ_4', correctAnswer: 'A' }]
-                        };
-                      }));
-                    }}
-                    className="px-3 py-1.5 rounded text-xs font-mono bg-[#18181b] hover:bg-zinc-800 text-zinc-200 border border-[#27272a] cursor-pointer"
+                    onClick={() => handleResetToFullGDPT2018Key(currentKey.code)}
+                    className="px-3 py-1.5 rounded text-xs font-mono bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-300 border border-emerald-500/40 cursor-pointer flex items-center gap-1.5"
+                    title="Tự động tạo đủ 18 câu Phần I + 4 câu Phần II + 6 câu Phần III"
                   >
-                    + Thêm Câu Trắc Nghiệm
+                    <RefreshCw className="w-3.5 h-3.5" />
+                    <span>Khôi Phục Chuẩn 3 Phần (28 Câu)</span>
                   </button>
                 </div>
 
-                {/* Question Answer Items Grid */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
-                  {currentKey.answers.map((ans) => (
-                    <div
-                      key={ans.questionNumber}
-                      className="p-3 rounded border border-[#27272a] bg-[#18181b] space-y-2 text-xs font-mono"
-                    >
-                      <div className="flex items-center justify-between text-zinc-300">
-                        <span className="font-bold text-emerald-400">Câu {ans.questionNumber}:</span>
-                        <span className="text-[10px] text-zinc-500">{ans.type === 'MCQ_4' ? 'Trắc nghiệm 4 op' : ans.type === 'TRUE_FALSE_4' ? 'Đúng/Sai' : 'Trả lời ngắn'}</span>
-                      </div>
+                {/* 🟢 PHẦN I: TRẮC NGHIỆM 4 LỰA CHỌN (18 CÂU - 4.5 ĐIỂM) */}
+                <div className="space-y-3 p-4 rounded-lg bg-[#121215] border border-emerald-500/30">
+                  <div className="flex items-center justify-between border-b border-[#27272a] pb-2 font-mono">
+                    <div className="flex items-center gap-2">
+                      <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
+                        PHẦN I (18 CÂU)
+                      </span>
+                      <h5 className="font-bold text-xs text-white uppercase tracking-wider">
+                        Trắc Nghiệm 4 Lựa Chọn (4.5 Điểm)
+                      </h5>
+                    </div>
+                    <span className="text-[10px] text-emerald-300">0.25đ / câu đúng</span>
+                  </div>
 
-                      {/* Options Selector for MCQ_4 */}
-                      {ans.type === 'MCQ_4' ? (
-                        <div className="flex items-center gap-1.5">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-2 font-mono text-xs">
+                    {part1Answers.map((ans, idx) => (
+                      <div key={ans.questionNumber || idx} className="p-2 rounded bg-[#18181b] border border-[#27272a] space-y-1.5">
+                        <div className="flex justify-between items-center text-zinc-300 font-bold">
+                          <span className="text-emerald-400">Câu {ans.questionNumber || idx + 1}</span>
+                          <span className="text-[10px] text-zinc-500">(0.25đ)</span>
+                        </div>
+                        <div className="flex items-center gap-1">
                           {['A', 'B', 'C', 'D'].map((opt) => (
                             <button
                               key={opt}
                               type="button"
                               onClick={() => handleUpdateOption(currentKey.code, ans.questionNumber, opt)}
-                              className={`flex-1 py-1.5 rounded text-xs font-bold transition-all cursor-pointer ${
+                              className={`flex-1 py-1 rounded text-xs font-bold transition-all cursor-pointer ${
                                 ans.correctAnswer === opt
                                   ? 'bg-emerald-600 text-white shadow-md'
                                   : 'bg-[#09090b] text-zinc-400 hover:bg-zinc-800 border border-[#27272a]'
@@ -835,32 +908,123 @@ export const SmartGradingOCR: React.FC<SmartGradingOCRProps> = ({
                             </button>
                           ))}
                         </div>
-                      ) : (
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* 🔵 PHẦN II: TRẮC NGHIỆM ĐÚNG / SAI (4 CÂU - 16 Ý - 4.0 ĐIỂM) */}
+                <div className="space-y-3 p-4 rounded-lg bg-[#121215] border border-cyan-500/30">
+                  <div className="flex items-center justify-between border-b border-[#27272a] pb-2 font-mono">
+                    <div className="flex items-center gap-2">
+                      <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-cyan-500/20 text-cyan-400 border border-cyan-500/30">
+                        PHẦN II (4 CÂU - 16 Ý)
+                      </span>
+                      <h5 className="font-bold text-xs text-white uppercase tracking-wider">
+                        Trắc Nghiệm Đúng / Sai (4.0 Điểm)
+                      </h5>
+                    </div>
+                    <span className="text-[10px] text-cyan-300">Điểm lũy tiến: 1 ý = 0.1đ | 2 ý = 0.25đ | 3 ý = 0.5đ | 4 ý = 1.0đ</span>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3 font-mono text-xs">
+                    {part2Answers.map((ans, qIdx) => {
+                      const qNum = ans.questionNumber || qIdx + 1;
+                      const tfObj = parseTrueFalseObj(ans.correctAnswer);
+
+                      return (
+                        <div key={qIdx} className="p-3 rounded bg-[#18181b] border border-[#27272a] space-y-2">
+                          <div className="flex items-center justify-between text-zinc-200 font-bold border-b border-[#27272a] pb-1">
+                            <span className="text-cyan-400">Câu {qNum} (Phần II)</span>
+                            <span className="text-[10px] text-zinc-400">Tối đa 1.0đ (4 ý a,b,c,d)</span>
+                          </div>
+
+                          <div className="grid grid-cols-2 gap-2 text-[11px]">
+                            {(['a', 'b', 'c', 'd'] as const).map((subItem) => {
+                              const currentVal = tfObj[subItem];
+                              return (
+                                <div key={subItem} className="flex items-center justify-between p-1.5 rounded bg-[#09090b] border border-[#27272a]">
+                                  <span className="text-zinc-300 font-bold">Ý {subItem}:</span>
+                                  <div className="flex items-center gap-1">
+                                    <button
+                                      type="button"
+                                      onClick={() => handleToggleTrueFalseSubItem(currentKey.code, qNum, subItem, 'Đ')}
+                                      className={`px-2 py-0.5 rounded text-[10px] font-bold cursor-pointer transition-all ${
+                                        currentVal === 'Đ'
+                                          ? 'bg-emerald-600 text-white shadow'
+                                          : 'bg-[#18181b] text-zinc-400 hover:text-white border border-[#27272a]'
+                                      }`}
+                                    >
+                                      Đúng (Đ)
+                                    </button>
+                                    <button
+                                      type="button"
+                                      onClick={() => handleToggleTrueFalseSubItem(currentKey.code, qNum, subItem, 'S')}
+                                      className={`px-2 py-0.5 rounded text-[10px] font-bold cursor-pointer transition-all ${
+                                        currentVal === 'S'
+                                          ? 'bg-rose-600 text-white shadow'
+                                          : 'bg-[#18181b] text-zinc-400 hover:text-white border border-[#27272a]'
+                                      }`}
+                                    >
+                                      Sai (S)
+                                    </button>
+                                  </div>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* 🟣 PHẦN III: TRẮC NGHIỆM TRẢ LỜI NGẮN (6 CÂU - 1.5 ĐIỂM) */}
+                <div className="space-y-3 p-4 rounded-lg bg-[#121215] border border-amber-500/30">
+                  <div className="flex items-center justify-between border-b border-[#27272a] pb-2 font-mono">
+                    <div className="flex items-center gap-2">
+                      <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-500/20 text-amber-400 border border-amber-500/30">
+                        PHẦN III (6 CÂU)
+                      </span>
+                      <h5 className="font-bold text-xs text-white uppercase tracking-wider">
+                        Trắc Nghiệm Trả Lời Ngắn (1.5 Điểm)
+                      </h5>
+                    </div>
+                    <span className="text-[10px] text-amber-300">0.25đ / câu đúng (Số / Kết quả)</span>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 font-mono text-xs">
+                    {part3Answers.map((ans, idx) => (
+                      <div key={ans.questionNumber || idx} className="p-2.5 rounded bg-[#18181b] border border-[#27272a] space-y-1">
+                        <div className="flex justify-between items-center text-zinc-300 font-bold">
+                          <span className="text-amber-400">Câu {ans.questionNumber || idx + 1} (Phần III):</span>
+                          <span className="text-[10px] text-zinc-500">(0.25đ)</span>
+                        </div>
                         <input
                           type="text"
                           value={ans.correctAnswer}
-                          onChange={(e) => handleUpdateOption(currentKey.code, ans.questionNumber, e.target.value)}
-                          className="w-full px-2 py-1 rounded bg-[#09090b] border border-[#27272a] text-zinc-200 focus:outline-none focus:border-emerald-500 text-xs"
+                          onChange={(e) => handleUpdateOption(currentKey.code, ans.questionNumber, e.target.value, 'SHORT_ANSWER')}
+                          placeholder="VD: 2.5 hoặc -4.2"
+                          className="w-full px-2 py-1.5 rounded bg-[#09090b] border border-[#27272a] text-amber-300 font-bold focus:outline-none focus:border-amber-500 text-xs"
                         />
-                      )}
-                    </div>
-                  ))}
+                      </div>
+                    ))}
+                  </div>
                 </div>
 
                 {/* Quick String Key Importer */}
                 <div className="p-4 rounded bg-[#18181b] border border-[#27272a] space-y-2">
-                  <span className="text-xs font-bold text-zinc-300 font-mono block">⚡ Nhập Nhanh Đáp Án Chuỗi Rút Gọn:</span>
+                  <span className="text-xs font-bold text-zinc-300 font-mono block">⚡ Nhập Nhanh Đáp Án Chuỗi Rút Gọn (Phần I):</span>
                   <div className="flex gap-2">
                     <input
                       type="text"
                       value={quickAnswerInput}
                       onChange={(e) => setQuickAnswerInput(e.target.value)}
-                      placeholder="VD: 1A 2B 3C 4D 5A 6C"
+                      placeholder="VD: 1A 2B 3C 4D 5A 6C 7D 8A 9B 10C 11D 12A 13B 14C 15D 16A 17B 18C"
                       className="flex-1 px-3 py-2 rounded bg-[#09090b] border border-[#27272a] text-xs font-mono text-emerald-300 focus:outline-none focus:border-emerald-500"
                     />
                     <button
                       onClick={() => {
-                        // Parse "1A 2B 3C" or "A B C D"
                         const tokens = quickAnswerInput.trim().split(/\s+/);
                         const parsedList: Array<{ questionNumber: number; type: 'MCQ_4'; correctAnswer: string }> = [];
                         
@@ -874,15 +1038,19 @@ export const SmartGradingOCR: React.FC<SmartGradingOCRProps> = ({
                         });
 
                         if (parsedList.length > 0) {
-                          setExamKeys(prev => prev.map(k => k.code === currentKey.code ? { ...k, answers: parsedList } : k));
-                          alert(`Đã cập nhật tự động ${parsedList.length} câu đáp án cho Mã Đề ${currentKey.code}!`);
+                          setExamKeys(prev => prev.map(k => {
+                            if (k.code !== currentKey.code) return k;
+                            const otherPartAnswers = k.answers.filter(a => a.type !== 'MCQ_4');
+                            return { ...k, answers: [...parsedList, ...otherPartAnswers] };
+                          }));
+                          alert(`✓ Đã cập nhật tự động ${parsedList.length} câu Phần I cho Mã Đề ${currentKey.code}!`);
                         } else {
                           alert('Định dạng không hợp lệ. Ví dụ đúng: 1A 2B 3C 4D');
                         }
                       }}
                       className="px-4 py-2 rounded bg-emerald-600 hover:bg-emerald-500 text-white font-mono font-bold text-xs cursor-pointer shadow"
                     >
-                      Áp Dụng
+                      Áp Dụng Phần I
                     </button>
                   </div>
                 </div>
