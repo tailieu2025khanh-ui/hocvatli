@@ -110,14 +110,22 @@ export const TeacherCollaboration: React.FC<TeacherCollaborationProps> = ({
     setNewColleagueEmail('');
   };
 
+  const [newMatFileBlobUrl, setNewMatFileBlobUrl] = useState<string>('');
+
   // Handle File Drag & Upload Simulation
   const handleFileSelectSimulated = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
       setNewMatFileName(file.name);
-      setNewMatFileSize(`${(file.size / (1024 * 1024)).toFixed(1)} MB`);
+      const sizeMb = (file.size / (1024 * 1024)).toFixed(1);
+      setNewMatFileSize(`${sizeMb} MB`);
       if (!newMatTitle) {
         setNewMatTitle(file.name.replace(/\.[^/.]+$/, ''));
+      }
+      if (file.type.startsWith('video/') || file.name.match(/\.(mp4|webm|mov|mkv|avi)$/i)) {
+        setNewMatType('VIDEO');
+        const blobUrl = URL.createObjectURL(file);
+        setNewMatFileBlobUrl(blobUrl);
       }
     }
   };
@@ -129,6 +137,7 @@ export const TeacherCollaboration: React.FC<TeacherCollaborationProps> = ({
 
     setIsUploading(true);
     setTimeout(() => {
+      const isVid = newMatType === 'VIDEO' || !!newMatFileBlobUrl;
       const created: TeachingMaterial = {
         id: `mat_${Date.now()}`,
         title: newMatTitle,
@@ -147,6 +156,11 @@ export const TeacherCollaboration: React.FC<TeacherCollaborationProps> = ({
         assignedSubGroups: newMatSubGroup === 'Tất cả các Tổ' ? undefined : [newMatSubGroup],
         viewCount: 1,
         downloadCount: 0,
+        isExternalWeb: isVid,
+        webUrl: newMatFileBlobUrl || undefined,
+        embedUrl: newMatFileBlobUrl || undefined,
+        videoHost: isVid ? 'DIRECT_MP4' : undefined,
+        siteName: isVid ? `File Video Máy Tính (${newMatFileSize || 'HD'})` : undefined,
       };
 
       onAddMaterial(created);
@@ -155,6 +169,7 @@ export const TeacherCollaboration: React.FC<TeacherCollaborationProps> = ({
       setNewMatTitle('');
       setNewMatDesc('');
       setNewMatFileName('');
+      setNewMatFileBlobUrl('');
     }, 1000);
   };
 
