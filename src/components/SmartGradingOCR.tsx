@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Question, SubmissionResult } from '../types';
-import { Camera, Upload, Sparkles, CheckCircle2, XCircle, AlertTriangle, RefreshCw, FileText, Check, BrainCircuit, Table, Download, Copy, ExternalLink, Settings, Smartphone, Sliders, ShieldCheck, Zap, RotateCw } from 'lucide-react';
+import { Question, SubmissionResult, ExamCodeKey } from '../types';
+import { Camera, Upload, Sparkles, CheckCircle2, XCircle, AlertTriangle, RefreshCw, Check, Table, Download, Copy, ExternalLink, Smartphone, Sliders, Zap } from 'lucide-react';
 import { downloadExamKeyTemplate, parseExamKeyExcelImport } from '../utils/excelUtils';
 
 interface SmartGradingOCRProps {
@@ -8,16 +8,6 @@ interface SmartGradingOCRProps {
   questions: Question[];
   submissions?: SubmissionResult[];
   onSubmissionGraded: (submission: SubmissionResult) => void;
-}
-
-interface ExamCodeKey {
-  code: string; // e.g., '101', '102', '103'
-  title: string;
-  answers: Array<{
-    questionNumber: number;
-    type: 'MCQ_4' | 'TRUE_FALSE_4' | 'SHORT_ANSWER';
-    correctAnswer: string; // e.g. 'A', 'B', 'a-Đ, b-S, c-Đ, d-S', '2.5 Pa'
-  }>;
 }
 
 export const SmartGradingOCR: React.FC<SmartGradingOCRProps> = ({
@@ -732,7 +722,6 @@ export const SmartGradingOCR: React.FC<SmartGradingOCRProps> = ({
                       try {
                         const importedKeys = await parseExamKeyExcelImport(file);
                         setExamKeys(prev => {
-                          const existingCodes = new Set(prev.map(k => k.code));
                           const updated = [...prev];
                           importedKeys.forEach(ik => {
                             const idx = updated.findIndex(k => k.code === ik.code);
