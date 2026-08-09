@@ -1,5 +1,5 @@
 import * as XLSX from 'xlsx';
-import { StudentProfile, SubmissionResult, GradeLevel } from '../types';
+import { StudentProfile, SubmissionResult, GradeLevel, ExamCodeKey } from '../types';
 
 /**
  * Download standard Excel template for bulk importing students into the system
@@ -284,7 +284,7 @@ export const downloadExamKeyTemplate = () => {
 /**
  * Parse an uploaded Excel/CSV file containing answer keys for multiple exam codes
  */
-export const parseExamKeyExcelImport = (file: File): Promise<Array<{ code: string; title: string; answers: any[] }>> => {
+export const parseExamKeyExcelImport = (file: File): Promise<ExamCodeKey[]> => {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
 
@@ -308,10 +308,13 @@ export const parseExamKeyExcelImport = (file: File): Promise<Array<{ code: strin
                 const rawAns = String(row[key] || '').trim();
                 const qNumStr = row['STT Câu'] || `Câu ${idx + 1}`;
 
+                const qType: 'MCQ_4' | 'TRUE_FALSE_4' | 'SHORT_ANSWER' = sheetName.includes('Đúng')
+                  ? 'TRUE_FALSE_4'
+                  : (sheetName.includes('Ngắn') ? 'SHORT_ANSWER' : 'MCQ_4');
+
                 examKeysMap[code].push({
                   questionNumber: idx + 1,
-                  questionLabel: qNumStr,
-                  type: sheetName.includes('Đúng') ? 'TRUE_FALSE_4' : (sheetName.includes('Ngắn') ? 'SHORT_ANSWER' : 'MCQ_4'),
+                  type: qType,
                   correctAnswer: rawAns
                 });
               }
@@ -319,7 +322,7 @@ export const parseExamKeyExcelImport = (file: File): Promise<Array<{ code: strin
           });
         });
 
-        const examKeys = Object.keys(examKeysMap).map(code => ({
+        const examKeys: ExamCodeKey[] = Object.keys(examKeysMap).map(code => ({
           code: code || '101',
           title: `Đề thi mã ${code} - GDPT 2018 (Excel Import)`,
           answers: examKeysMap[code]
@@ -330,7 +333,11 @@ export const parseExamKeyExcelImport = (file: File): Promise<Array<{ code: strin
             {
               code: '101',
               title: 'Mã đề 101 (Tải từ Excel)',
-              answers: Array.from({ length: 18 }, (_, i) => ({ questionNumber: i + 1, type: 'MCQ_4', correctAnswer: ['A','B','C','D'][i%4] }))
+              answers: Array.from({ length: 18 }, (_, i) => ({
+                questionNumber: i + 1,
+                type: 'MCQ_4' as const,
+                correctAnswer: ['A','B','C','D'][i%4]
+              }))
             }
           ]);
           return;
