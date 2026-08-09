@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Question, SubmissionResult } from '../types';
-import { Camera, Upload, Sparkles, CheckCircle2, XCircle, AlertTriangle, RefreshCw, FileText, Check, BrainCircuit, Table, Download, Copy, ExternalLink, Settings, Smartphone, Sliders, ShieldCheck, Zap } from 'lucide-react';
+import { Camera, Upload, Sparkles, CheckCircle2, XCircle, AlertTriangle, RefreshCw, FileText, Check, BrainCircuit, Table, Download, Copy, ExternalLink, Settings, Smartphone, Sliders, ShieldCheck, Zap, RotateCw } from 'lucide-react';
+import { downloadExamKeyTemplate, parseExamKeyExcelImport } from '../utils/excelUtils';
 
 interface SmartGradingOCRProps {
   isDarkMode: boolean;
@@ -709,12 +710,60 @@ export const SmartGradingOCR: React.FC<SmartGradingOCRProps> = ({
               </p>
             </div>
 
-            <button
-              onClick={handleAddNewExamCode}
-              className="px-3.5 py-2 rounded text-xs font-mono font-bold bg-emerald-600 hover:bg-emerald-500 text-white shadow flex items-center gap-1.5 cursor-pointer self-start sm:self-auto"
-            >
-              + Tạo Mã Đề Mới
-            </button>
+            <div className="flex flex-wrap items-center gap-2">
+              <button
+                onClick={downloadExamKeyTemplate}
+                className="px-3.5 py-2 rounded text-xs font-mono font-bold bg-amber-600 hover:bg-amber-500 text-white shadow flex items-center gap-1.5 cursor-pointer"
+                title="Tải mẫu Excel đáp án mã đề theo 3 phần THPT GDPT 2018 để chỉnh sửa"
+              >
+                <Download className="w-3.5 h-3.5" />
+                <span>Tải Excel Mẫu Đáp Án (3 Phần)</span>
+              </button>
+
+              <label className="px-3.5 py-2 rounded text-xs font-mono font-bold bg-sky-700 hover:bg-sky-600 text-white shadow flex items-center gap-1.5 cursor-pointer">
+                <Upload className="w-3.5 h-3.5" />
+                <span>Nhập File Đáp Án Excel</span>
+                <input
+                  type="file"
+                  accept=".xlsx,.xls,.csv"
+                  onChange={async (e) => {
+                    const file = e.target.files?.[0];
+                    if (file) {
+                      try {
+                        const importedKeys = await parseExamKeyExcelImport(file);
+                        setExamKeys(prev => {
+                          const existingCodes = new Set(prev.map(k => k.code));
+                          const updated = [...prev];
+                          importedKeys.forEach(ik => {
+                            const idx = updated.findIndex(k => k.code === ik.code);
+                            if (idx >= 0) {
+                              updated[idx] = ik;
+                            } else {
+                              updated.push(ik);
+                            }
+                          });
+                          return updated;
+                        });
+                        if (importedKeys.length > 0) {
+                          setSelectedExamCode(importedKeys[0].code);
+                          alert(`Đã nhập thành công ${importedKeys.length} mã đề từ file Excel!`);
+                        }
+                      } catch (err: any) {
+                        alert(`Lỗi đọc file Excel: ${err.message || 'Sai định dạng file.'}`);
+                      }
+                    }
+                  }}
+                  className="hidden"
+                />
+              </label>
+
+              <button
+                onClick={handleAddNewExamCode}
+                className="px-3.5 py-2 rounded text-xs font-mono font-bold bg-emerald-600 hover:bg-emerald-500 text-white shadow flex items-center gap-1.5 cursor-pointer"
+              >
+                + Tạo Mã Đề Mới
+              </button>
+            </div>
           </div>
 
           {/* Exam Code Selector Pills */}
