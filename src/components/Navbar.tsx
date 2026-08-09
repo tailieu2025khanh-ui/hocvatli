@@ -243,43 +243,7 @@ export const Navbar: React.FC<NavbarProps> = ({
         </div>
       </div>
 
-      {/* 2. OFFICIAL BLUE HERO BANNER (Tone Xanh Dương Cổng GD&ĐT Thành Phố) */}
-      <div className="bg-gradient-to-r from-[#0284c7] via-[#0369a1] to-[#075985] text-white shadow-md border-b-2 border-amber-400">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 sm:py-4 flex flex-col md:flex-row items-center justify-between gap-4">
-          
-          {/* Left Coat-of-Arms Badge & System Title */}
-          <div className="flex items-center gap-4">
-            <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-white text-[#cb1c24] border-4 border-amber-300 flex items-center justify-center shadow-lg font-black text-2xl shrink-0">
-              🇻🇳
-            </div>
-            <div>
-              <p className="text-[11px] sm:text-xs font-semibold tracking-widest text-amber-300 uppercase font-sans">
-                CỔNG THÔNG TIN ĐIỆN TỬ & HỆ THỐNG LỚP HỌC LMS GDPT 2018
-              </p>
-              <h1 className="text-lg sm:text-2xl font-black tracking-tight text-white uppercase mt-0.5">
-                NGÀNH GD&ĐT THÀNH PHỐ HỒ CHÍ MINH • VẬT LÝ THPT
-              </h1>
-              <p className="text-xs sm:text-sm font-medium text-sky-100 tracking-wide font-sans">
-                DEPARTMENT OF PHYSICS EDUCATION AND TRAINING • HỌC VẬT LÍ THẬT THÚ VỊ
-              </p>
-            </div>
-          </div>
 
-          {/* Right Circular Photo Spotlights */}
-          <div className="hidden lg:flex items-center gap-3">
-            <div className="w-12 h-12 rounded-full border-2 border-white overflow-hidden shadow">
-              <img src="https://images.unsplash.com/photo-1509062522246-3755977927d7?w=200&auto=format&fit=crop&q=80" alt="Phòng Thí Nghiệm" className="w-full h-full object-cover" />
-            </div>
-            <div className="w-12 h-12 rounded-full border-2 border-white overflow-hidden shadow">
-              <img src="https://images.unsplash.com/photo-1577896851231-70ef18881754?w=200&auto=format&fit=crop&q=80" alt="Lớp Học LMS" className="w-full h-full object-cover" />
-            </div>
-            <div className="w-12 h-12 rounded-full border-2 border-white overflow-hidden shadow">
-              <img src="https://images.unsplash.com/photo-1427504494785-3a9ca7044f45?w=200&auto=format&fit=crop&q=80" alt="Học Sinh Năng Động" className="w-full h-full object-cover" />
-            </div>
-          </div>
-
-        </div>
-      </div>
 
       {/* 3. VIBRANT CRIMSON RED NAVIGATION BAR (Thanh Menu Đỏ Chuẩn Portal HCM-EDU) */}
       <div className="bg-[#cb1c24] text-white sticky top-0 z-50 shadow-md border-b border-rose-900">
