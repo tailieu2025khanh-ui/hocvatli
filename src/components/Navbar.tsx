@@ -46,12 +46,12 @@ export const Navbar: React.FC<NavbarProps> = ({
   const activeName = role === 'TEACHER' ? (currentTeacher?.name || 'Giáo viên') : (currentStudent?.name || 'Học sinh');
 
   return (
-    <header className={`sticky top-0 z-50 border-b transition-colors duration-200 ${
+    <header className={`sticky top-0 z-50 border-b transition-colors duration-200 pt-3 sm:pt-4 pb-2 ${
       isDarkMode 
         ? 'bg-[#0c0c0e]/95 border-[#27272a] text-zinc-100 backdrop-blur-md' 
         : 'bg-white/95 border-slate-200/90 text-slate-800 backdrop-blur-md shadow-xs'
     }`}>
-      <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-12 h-18 flex items-center justify-between gap-4">
+      <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-12 flex flex-wrap items-center justify-between gap-3 min-h-[52px]">
         
         {/* Brand Logo & System Title */}
         <div className="flex items-center gap-3">
