@@ -22,7 +22,7 @@ import { PhysicsAISolverModal } from './components/PhysicsAISolverModal';
 import { UserProfileEditModal } from './components/UserProfileEditModal';
 import { GeminiApiKeyModal } from './components/GeminiApiKeyModal';
 import { getStoredApiKey } from './utils/geminiClient';
-import { LayoutDashboard, Camera, Activity, BookOpen, Users, UserPlus, Trophy, Crown, Video, Globe, Database, Gamepad2, BrainCircuit, BarChart3, Search, Lightbulb } from 'lucide-react';
+import { Database } from 'lucide-react';
 
 export default function App() {
   const [role, setRole] = useState<UserRole>('TEACHER');
