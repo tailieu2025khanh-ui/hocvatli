@@ -14,6 +14,18 @@ export interface TrueFalseItem {
   isCorrect: boolean;
 }
 
+export interface ExamCodeKeyAnswer {
+  questionNumber: number;
+  type: QuestionType;
+  correctAnswer: string;
+}
+
+export interface ExamCodeKey {
+  code: string;
+  title: string;
+  answers: ExamCodeKeyAnswer[];
+}
+
 export interface Question {
   id: string;
   grade: GradeLevel;
