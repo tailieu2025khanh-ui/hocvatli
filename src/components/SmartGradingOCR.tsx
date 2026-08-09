@@ -897,7 +897,7 @@ export const SmartGradingOCR: React.FC<SmartGradingOCRProps> = ({
                             <button
                               key={opt}
                               type="button"
-                              onClick={() => handleUpdateOption(currentKey.code, ans.questionNumber, opt)}
+                              onClick={() => handleUpdateOption(currentKey.code, ans.questionNumber, opt, 'MCQ_4')}
                               className={`flex-1 py-1 rounded text-xs font-bold transition-all cursor-pointer ${
                                 ans.correctAnswer === opt
                                   ? 'bg-emerald-600 text-white shadow-md'
