@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { TeachingMaterial, GradeLevel, MaterialType, ColleagueTeacher } from '../types';
+import { TeachingMaterial, GradeLevel, ColleagueTeacher } from '../types';
 import { parseVideoLink, ParsedVideo } from '../utils/videoHelper';
-import { Video, Globe, Play, ExternalLink, Plus, Search, Filter, BookOpen, Sparkles, Send, Trash2, Eye, FileText, CheckCircle2, Bookmark, Monitor, Layers, Edit, RefreshCw } from 'lucide-react';
+import { Video, Globe, Play, ExternalLink, Search, Sparkles, Send, Trash2, Monitor, Edit, RefreshCw } from 'lucide-react';
 
 interface WebResourceAndVideoHubProps {
   isDarkMode: boolean;
@@ -42,7 +42,6 @@ export const WebResourceAndVideoHub: React.FC<WebResourceAndVideoHubProps> = ({
   // Filter States
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [gradeFilter, setGradeFilter] = useState<string>('ALL');
-  const [topicFilter, setTopicFilter] = useState<string>('ALL');
 
   // Form State for Adding Video / Web Document Link
   const [formTitle, setFormTitle] = useState<string>('');
