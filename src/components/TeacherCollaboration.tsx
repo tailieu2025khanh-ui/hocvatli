@@ -15,6 +15,7 @@ interface TeacherCollaborationProps {
   onUpdatePermissions: (teacherId: string, permissions: ColleagueTeacher['permissions']) => void;
   onAddMaterial: (material: TeachingMaterial) => void;
   onDeleteMaterial: (materialId: string) => void;
+  onUpdateMaterial?: (material: TeachingMaterial) => void;
   onAddTask: (task: AssignedTask) => void;
 }
 
@@ -30,6 +31,7 @@ export const TeacherCollaboration: React.FC<TeacherCollaborationProps> = ({
   onUpdatePermissions,
   onAddMaterial,
   onDeleteMaterial,
+  onUpdateMaterial,
   onAddTask,
 }) => {
   const [subTab, setSubTab] = useState<'COLLEAGUES' | 'MATERIALS' | 'TASKS'>('COLLEAGUES');
@@ -618,9 +620,13 @@ export const TeacherCollaboration: React.FC<TeacherCollaborationProps> = ({
 
                   {mat.uploadedByTeacherId === currentTeacher.id && (
                     <button
-                      onClick={() => onDeleteMaterial(mat.id)}
+                      onClick={() => {
+                        if (window.confirm(`Bạn có chắc chắn muốn XÓA bài giảng / tài liệu "${mat.title}" không?\n\nHành động này không thể phục hồi.`)) {
+                          onDeleteMaterial(mat.id);
+                        }
+                      }}
                       className="p-1 text-zinc-500 hover:text-rose-400 transition-colors cursor-pointer"
-                      title="Xóa tài liệu"
+                      title="Xóa bài giảng/tài liệu không đạt yêu cầu"
                     >
                       <Trash2 className="w-3.5 h-3.5" />
                     </button>
