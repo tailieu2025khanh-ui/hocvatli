@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { TeachingMaterial, GradeLevel, ColleagueTeacher } from '../types';
-import { parseVideoLink, ParsedVideo } from '../utils/videoHelper';
-import { Video, Globe, Play, ExternalLink, Search, Sparkles, Send, Trash2, Monitor, Edit, RefreshCw } from 'lucide-react';
+import { parseVideoLink, ParsedVideo, formatFileSize } from '../utils/videoHelper';
+import { Video, Globe, Play, ExternalLink, Search, Sparkles, Send, Trash2, Monitor, Edit, RefreshCw, Upload, FileVideo } from 'lucide-react';
 
 interface WebResourceAndVideoHubProps {
   isDarkMode: boolean;
@@ -38,6 +38,35 @@ export const WebResourceAndVideoHub: React.FC<WebResourceAndVideoHubProps> = ({
   const [editGrade, setEditGrade] = useState<GradeLevel>(12);
   const [editTopic, setEditTopic] = useState<string>('');
   const [editSiteName, setEditSiteName] = useState<string>('');
+
+  // Local File Upload States (For both Add & Replace Modals)
+  const [videoSourceType, setVideoSourceType] = useState<'URL' | 'FILE'>('URL');
+  const [localVideoFile, setLocalVideoFile] = useState<File | null>(null);
+  const [localVideoFileName, setLocalVideoFileName] = useState<string>('');
+  const [localVideoFileSize, setLocalVideoFileSize] = useState<string>('');
+  const [localVideoBlobUrl, setLocalVideoBlobUrl] = useState<string>('');
+
+  // Handle local video file selection
+  const handleSelectLocalVideoFile = (file: File) => {
+    if (!file) return;
+    const blobUrl = URL.createObjectURL(file);
+    const formattedSize = formatFileSize(file.size);
+
+    setLocalVideoFile(file);
+    setLocalVideoFileName(file.name);
+    setLocalVideoFileSize(formattedSize);
+    setLocalVideoBlobUrl(blobUrl);
+
+    // Auto fill title if empty
+    const cleanName = file.name.replace(/\.[^/.]+$/, '');
+    if (!formTitle.trim()) setFormTitle(cleanName);
+    if (!editTitle.trim()) setEditTitle(cleanName);
+
+    setFormUrl(blobUrl);
+    setEditUrl(blobUrl);
+    setFormSiteName(`File Máy Tính (${formattedSize})`);
+    setEditSiteName(`File Máy Tính (${formattedSize})`);
+  };
 
   // Filter States
   const [searchQuery, setSearchQuery] = useState<string>('');
@@ -151,18 +180,22 @@ export const WebResourceAndVideoHub: React.FC<WebResourceAndVideoHubProps> = ({
     return matchesSearch && matchesGrade && matchesTab;
   });
 
-  // Handle Adding New Video / Web Document Link
+  // Handle Adding New Video / Web Document Link / Local Video File
   const handleAddSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formTitle.trim() || !formUrl.trim()) return;
+    const targetUrl = videoSourceType === 'FILE' ? localVideoBlobUrl : formUrl;
+    if (!formTitle.trim() || !targetUrl.trim()) {
+      alert('Vui lòng nhập tiêu đề và chọn file video hoặc dán đường link!');
+      return;
+    }
 
-    const parsedVid = parseVideoLink(formUrl);
-    const isVid = addMode === 'VIDEO' || parsedVid.type === 'YOUTUBE' || parsedVid.type === 'VIMEO' || parsedVid.type === 'DIRECT_MP4';
+    const parsedVid = parseVideoLink(targetUrl);
+    const isVid = addMode === 'VIDEO' || videoSourceType === 'FILE' || parsedVid.type === 'YOUTUBE' || parsedVid.type === 'VIMEO' || parsedVid.type === 'DIRECT_MP4';
 
     const created: TeachingMaterial = {
       id: `web_${Date.now()}`,
       title: formTitle,
-      description: formDesc || 'Tài liệu video / trang web được nhúng trực tiếp vào ứng dụng HỌC VẬT LÍ THẬT THÚ VỊ.',
+      description: formDesc || (videoSourceType === 'FILE' ? `Video bài giảng tải trực tiếp từ máy tính (${localVideoFileName} - ${localVideoFileSize}).` : 'Tài liệu video / trang web được nhúng trực tiếp vào ứng dụng.'),
       type: isVid ? 'VIDEO' : 'WEB_ARTICLE',
       uploadedByTeacherId: currentTeacher?.id || 'tch_1',
       uploadedByTeacherName: currentTeacher?.name || 'Giáo Viên Vật Lý',
@@ -172,11 +205,13 @@ export const WebResourceAndVideoHub: React.FC<WebResourceAndVideoHubProps> = ({
       assignedClassCodes: ['PHY12-PRO'],
       viewCount: 1,
       downloadCount: 0,
-      isExternalWeb: true,
-      webUrl: formUrl,
-      embedUrl: parsedVid.embedUrl || formUrl,
-      videoHost: isVid ? parsedVid.type : undefined,
-      siteName: formSiteName || (isVid ? 'Video Mạng (YouTube/Vimeo)' : 'Trang Web Học Liệu'),
+      isExternalWeb: videoSourceType === 'URL',
+      webUrl: targetUrl,
+      embedUrl: targetUrl,
+      fileName: videoSourceType === 'FILE' ? localVideoFileName : undefined,
+      fileSize: videoSourceType === 'FILE' ? localVideoFileSize : undefined,
+      videoHost: videoSourceType === 'FILE' ? 'DIRECT_MP4' : (isVid ? parsedVid.type : undefined),
+      siteName: videoSourceType === 'FILE' ? `File Máy Tính (${localVideoFileSize})` : (formSiteName || 'Video Mạng (YouTube/Vimeo)'),
       thumbnailUrl: parsedVid.thumbnailUrl || (isVid 
         ? 'https://images.unsplash.com/photo-1611162617213-7d7a39e9b1d7?w=600&auto=format&fit=crop&q=80'
         : 'https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?w=600&auto=format&fit=crop&q=80')
@@ -187,6 +222,10 @@ export const WebResourceAndVideoHub: React.FC<WebResourceAndVideoHubProps> = ({
     setFormTitle('');
     setFormUrl('');
     setFormDesc('');
+    setLocalVideoFile(null);
+    setLocalVideoFileName('');
+    setLocalVideoBlobUrl('');
+    alert(`✓ Đã thêm bài giảng/video "${formTitle}" thành công!`);
   };
 
   // Open edit / replace modal
@@ -198,15 +237,22 @@ export const WebResourceAndVideoHub: React.FC<WebResourceAndVideoHubProps> = ({
     setEditGrade(mat.grade);
     setEditTopic(mat.topic);
     setEditSiteName(mat.siteName || '');
+    setVideoSourceType(mat.fileName ? 'FILE' : 'URL');
+    setLocalVideoFileName(mat.fileName || '');
+    setLocalVideoFileSize(mat.fileSize || '');
   };
 
   // Submit edit / replace material
   const handleEditSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!editingMaterial || !editTitle.trim() || !editUrl.trim()) return;
+    const targetUrl = videoSourceType === 'FILE' ? (localVideoBlobUrl || editUrl) : editUrl;
+    if (!editingMaterial || !editTitle.trim() || !targetUrl.trim()) {
+      alert('Vui lòng nhập tiêu đề và chọn file video hoặc link thay thế!');
+      return;
+    }
 
-    const parsedVid = parseVideoLink(editUrl);
-    const isVid = editingMaterial.type === 'VIDEO' || parsedVid.type === 'YOUTUBE' || parsedVid.type === 'VIMEO' || parsedVid.type === 'DIRECT_MP4';
+    const parsedVid = parseVideoLink(targetUrl);
+    const isVid = editingMaterial.type === 'VIDEO' || videoSourceType === 'FILE' || parsedVid.type === 'YOUTUBE' || parsedVid.type === 'VIMEO' || parsedVid.type === 'DIRECT_MP4';
 
     const updated: TeachingMaterial = {
       ...editingMaterial,
@@ -214,10 +260,12 @@ export const WebResourceAndVideoHub: React.FC<WebResourceAndVideoHubProps> = ({
       description: editDesc,
       grade: editGrade,
       topic: editTopic,
-      webUrl: editUrl,
-      embedUrl: parsedVid.embedUrl || editUrl,
-      videoHost: isVid ? parsedVid.type : undefined,
-      siteName: editSiteName || editingMaterial.siteName || 'Video Mạng (Đã Thay Thế)',
+      webUrl: targetUrl,
+      embedUrl: targetUrl,
+      fileName: videoSourceType === 'FILE' ? (localVideoFileName || editingMaterial.fileName) : undefined,
+      fileSize: videoSourceType === 'FILE' ? (localVideoFileSize || editingMaterial.fileSize) : undefined,
+      videoHost: videoSourceType === 'FILE' ? 'DIRECT_MP4' : (isVid ? parsedVid.type : undefined),
+      siteName: videoSourceType === 'FILE' ? `File Máy Tính (${localVideoFileSize || 'HD'})` : (editSiteName || editingMaterial.siteName || 'Video Mạng (Đã Thay Thế)'),
       thumbnailUrl: parsedVid.thumbnailUrl || editingMaterial.thumbnailUrl || 'https://images.unsplash.com/photo-1611162617213-7d7a39e9b1d7?w=600&auto=format&fit=crop&q=80'
     };
 
@@ -228,6 +276,9 @@ export const WebResourceAndVideoHub: React.FC<WebResourceAndVideoHubProps> = ({
     }
 
     setEditingMaterial(null);
+    setLocalVideoFile(null);
+    setLocalVideoFileName('');
+    setLocalVideoBlobUrl('');
     alert(`✓ Đã thay thế thành công nội dung/video bài giảng "${editTitle}"!`);
   };
 
@@ -525,22 +576,76 @@ export const WebResourceAndVideoHub: React.FC<WebResourceAndVideoHubProps> = ({
             </div>
 
             <form onSubmit={handleAddSubmit} className="space-y-4 text-xs font-mono">
-              <div>
-                <label className="block text-zinc-300 mb-1">
-                  {addMode === 'VIDEO' ? 'Đường Link Video (YouTube / Vimeo / MP4):' : 'Đường Link Website / Trang Tài Liệu Web:'}
-                </label>
-                <input
-                  type="url"
-                  required
-                  placeholder={addMode === 'VIDEO' ? 'https://www.youtube.com/watch?v=...' : 'https://thuvienhoclieu.com/...'}
-                  value={formUrl}
-                  onChange={(e) => setFormUrl(e.target.value)}
-                  className="w-full p-2.5 rounded bg-[#09090b] border border-[#27272a] text-emerald-400 focus:outline-none focus:border-emerald-500"
-                />
-              </div>
+              {addMode === 'VIDEO' && (
+                <div className="flex items-center gap-2 p-1 rounded bg-[#09090b] border border-[#27272a]">
+                  <button
+                    type="button"
+                    onClick={() => setVideoSourceType('URL')}
+                    className={`flex-1 py-1.5 rounded text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+                      videoSourceType === 'URL'
+                        ? 'bg-rose-600 text-white shadow'
+                        : 'text-zinc-400 hover:text-white'
+                    }`}
+                  >
+                    <Globe className="w-3.5 h-3.5" />
+                    <span>Dán Link Video (YouTube/Vimeo)</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setVideoSourceType('FILE')}
+                    className={`flex-1 py-1.5 rounded text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+                      videoSourceType === 'FILE'
+                        ? 'bg-rose-600 text-white shadow'
+                        : 'text-zinc-400 hover:text-white'
+                    }`}
+                  >
+                    <Upload className="w-3.5 h-3.5" />
+                    <span>Tải Video Từ Máy Tính</span>
+                  </button>
+                </div>
+              )}
+
+              {videoSourceType === 'URL' ? (
+                <div>
+                  <label className="block text-zinc-300 mb-1">
+                    {addMode === 'VIDEO' ? 'Đường Link Video (YouTube / Vimeo / MP4):' : 'Đường Link Website / Trang Tài Liệu Web:'}
+                  </label>
+                  <input
+                    type="url"
+                    required={videoSourceType === 'URL'}
+                    placeholder={addMode === 'VIDEO' ? 'https://www.youtube.com/watch?v=...' : 'https://thuvienhoclieu.com/...'}
+                    value={formUrl}
+                    onChange={(e) => setFormUrl(e.target.value)}
+                    className="w-full p-2.5 rounded bg-[#09090b] border border-[#27272a] text-emerald-400 focus:outline-none focus:border-emerald-500"
+                  />
+                </div>
+              ) : (
+                <div>
+                  <label className="block text-rose-400 font-bold mb-1">Chọn Tập Tin Video Từ Máy Tính (*.mp4, *.mov, *.webm, *.mkv):</label>
+                  <label className="block p-4 rounded-lg border-2 border-dashed border-rose-500/50 hover:border-rose-400 bg-rose-500/5 text-center cursor-pointer transition-all">
+                    <FileVideo className="w-8 h-8 mx-auto text-rose-400 mb-2 animate-bounce" />
+                    <span className="text-xs font-bold text-rose-300 block">
+                      {localVideoFileName ? `✓ Đã chọn file: ${localVideoFileName} (${localVideoFileSize})` : 'Bấm vào đây để chọn File Video từ Máy Tính'}
+                    </span>
+                    <span className="text-[10px] text-zinc-400 mt-1 block">
+                      Hệ thống tự động nhúng & phát trực tiếp video HD trên ứng dụng
+                    </span>
+                    <input
+                      type="file"
+                      accept="video/*"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) handleSelectLocalVideoFile(file);
+                      }}
+                      className="hidden"
+                    />
+                  </label>
+                </div>
+              )}
 
               <div>
-                <label className="block text-zinc-300 mb-1">Tiêu Đề Bài Học / Tài Liệu:</label>
+                <label className="block text-zinc-300 mb-1">Tiêu Đề Bài Học / Video (*):</label>
                 <input
                   type="text"
                   required
@@ -734,6 +839,10 @@ export const WebResourceAndVideoHub: React.FC<WebResourceAndVideoHubProps> = ({
               />
             </div>
 
+          </div>
+        </div>
+      )}
+
       {/* MODAL 4: EDIT / REPLACE VIDEO OR MATERIAL MODAL */}
       {editingMaterial && (
         <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
@@ -766,20 +875,72 @@ export const WebResourceAndVideoHub: React.FC<WebResourceAndVideoHubProps> = ({
                 />
               </div>
 
-              <div>
-                <label className="block text-amber-400 font-bold mb-1">Đường Link Video Mới (YouTube / Vimeo / MP4 / Web Link):</label>
-                <input
-                  type="url"
-                  required
-                  value={editUrl}
-                  onChange={(e) => setEditUrl(e.target.value)}
-                  placeholder="https://www.youtube.com/watch?v=..."
-                  className="w-full px-3 py-2 rounded bg-[#09090b] border border-amber-500/50 text-amber-300 focus:outline-none focus:border-amber-400 font-bold"
-                />
-                <span className="text-[10px] text-zinc-500 mt-1 block">
-                  💡 Dán link video mới để thay thế video cũ bị lỗi hoặc không đạt yêu cầu.
-                </span>
+              <div className="flex items-center gap-2 p-1 rounded bg-[#09090b] border border-[#27272a]">
+                <button
+                  type="button"
+                  onClick={() => setVideoSourceType('URL')}
+                  className={`flex-1 py-1.5 rounded text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+                    videoSourceType === 'URL'
+                      ? 'bg-amber-600 text-white shadow'
+                      : 'text-zinc-400 hover:text-white'
+                  }`}
+                >
+                  <Globe className="w-3.5 h-3.5" />
+                  <span>Dán Link Mới (YouTube/Vimeo)</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setVideoSourceType('FILE')}
+                  className={`flex-1 py-1.5 rounded text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+                    videoSourceType === 'FILE'
+                      ? 'bg-amber-600 text-white shadow'
+                      : 'text-zinc-400 hover:text-white'
+                  }`}
+                >
+                  <Upload className="w-3.5 h-3.5" />
+                  <span>Chọn Video File Máy Tính</span>
+                </button>
               </div>
+
+              {videoSourceType === 'URL' ? (
+                <div>
+                  <label className="block text-amber-400 font-bold mb-1">Đường Link Video Mới (YouTube / Vimeo / MP4 / Web Link):</label>
+                  <input
+                    type="url"
+                    required={videoSourceType === 'URL'}
+                    value={editUrl}
+                    onChange={(e) => setEditUrl(e.target.value)}
+                    placeholder="https://www.youtube.com/watch?v=..."
+                    className="w-full px-3 py-2 rounded bg-[#09090b] border border-amber-500/50 text-amber-300 focus:outline-none focus:border-amber-400 font-bold"
+                  />
+                  <span className="text-[10px] text-zinc-500 mt-1 block">
+                    💡 Dán link video mới để thay thế video cũ bị lỗi hoặc không đạt yêu cầu.
+                  </span>
+                </div>
+              ) : (
+                <div>
+                  <label className="block text-amber-400 font-bold mb-1">Thay Thế Bằng File Video Từ Máy Tính (*.mp4, *.mov, *.webm, *.mkv):</label>
+                  <label className="block p-4 rounded-lg border-2 border-dashed border-amber-500/50 hover:border-amber-400 bg-amber-500/5 text-center cursor-pointer transition-all">
+                    <FileVideo className="w-8 h-8 mx-auto text-amber-400 mb-2 animate-bounce" />
+                    <span className="text-xs font-bold text-amber-300 block">
+                      {localVideoFileName ? `✓ Đã chọn file mới: ${localVideoFileName} (${localVideoFileSize})` : 'Bấm vào đây để chọn File Video mới từ Máy Tính'}
+                    </span>
+                    <span className="text-[10px] text-zinc-400 mt-1 block">
+                      Phát mượt mà trực tiếp trên ứng dụng không lo bị chặn nhúng
+                    </span>
+                    <input
+                      type="file"
+                      accept="video/*"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) handleSelectLocalVideoFile(file);
+                      }}
+                      className="hidden"
+                    />
+                  </label>
+                </div>
+              )}
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
