@@ -1,11 +1,11 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Question, SubmissionResult, ExamCodeKey } from '../types';
-import { Camera, Upload, Sparkles, CheckCircle2, XCircle, AlertTriangle, RefreshCw, Check, Table, Download, Copy, ExternalLink, Smartphone, Sliders, Zap } from 'lucide-react';
+import { Camera, Upload, Sparkles, CheckCircle2, XCircle, AlertTriangle, RefreshCw, Check, Table, Download, Copy, ExternalLink, Smartphone, Zap } from 'lucide-react';
 import { downloadExamKeyTemplate, parseExamKeyExcelImport } from '../utils/excelUtils';
 
 interface SmartGradingOCRProps {
   isDarkMode: boolean;
-  questions: Question[];
+  questions?: Question[];
   submissions?: SubmissionResult[];
   onSubmissionGraded: (submission: SubmissionResult) => void;
 }
@@ -69,7 +69,7 @@ const parseTrueFalseObj = (raw: string) => {
 
 export const SmartGradingOCR: React.FC<SmartGradingOCRProps> = ({
   isDarkMode,
-  questions,
+  questions: _questions,
   submissions = [],
   onSubmissionGraded
 }) => {
