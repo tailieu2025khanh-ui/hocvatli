@@ -51,8 +51,17 @@ export function parseVideoLink(url: string): ParsedVideo {
     };
   }
 
-  // 3. Direct MP4 / WebM video file
-  if (trimmed.endsWith('.mp4') || trimmed.endsWith('.webm') || trimmed.endsWith('.ogg')) {
+  // 3. Direct MP4 / WebM / Local Blob Video File
+  if (
+    trimmed.startsWith('blob:') ||
+    trimmed.startsWith('data:video') ||
+    trimmed.endsWith('.mp4') ||
+    trimmed.endsWith('.webm') ||
+    trimmed.endsWith('.ogg') ||
+    trimmed.endsWith('.mov') ||
+    trimmed.endsWith('.mkv') ||
+    trimmed.endsWith('.avi')
+  ) {
     return {
       type: 'DIRECT_MP4',
       embedUrl: trimmed,
@@ -66,4 +75,15 @@ export function parseVideoLink(url: string): ParsedVideo {
     embedUrl: trimmed,
     originalUrl: trimmed
   };
+}
+
+/**
+ * Format raw byte numbers into human-readable file size strings (e.g. 24.5 MB)
+ */
+export function formatFileSize(bytes: number): string {
+  if (!bytes || bytes === 0) return '0 MB';
+  const k = 1024;
+  const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
 }
