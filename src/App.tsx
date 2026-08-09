@@ -163,176 +163,191 @@ export default function App() {
         isDbConnected={dbConfig.status === 'CONNECTED'}
       />
 
-      {/* Primary Section Navigation Tabs */}
-      <div className={`border-b sticky top-16 z-40 ${
+      {/* 3-ROW NAVIGATION ARCHITECTURE */}
+      <div className={`border-b sticky top-18 z-40 space-y-2 py-3 ${
         isDarkMode ? 'bg-[#0c0c0e]/95 border-[#27272a] backdrop-blur-md' : 'bg-white/95 border-slate-200/90 backdrop-blur-md shadow-xs'
       }`}>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center gap-2 overflow-x-auto py-2.5 text-xs font-mono">
+        
+        {/* ROW 2: LMS CORE & CONTENT HUBS */}
+        <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-12 flex items-center gap-3 overflow-x-auto text-sm font-sans">
+          <span className="text-xs font-mono font-bold uppercase text-slate-400 tracking-wider hidden xl:inline shrink-0">
+            Học Tập:
+          </span>
+
           <button
             onClick={() => setActiveTab('DASHBOARD')}
-            className={`flex items-center gap-2 px-3.5 py-1.5 rounded-md transition-all ${
+            className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold whitespace-nowrap transition-all cursor-pointer ${
               activeTab === 'DASHBOARD'
-                ? (isDarkMode ? 'bg-[#18181b] text-white border border-emerald-500/40 shadow-sm' : 'bg-teal-700 text-white font-bold shadow-sm')
-                : (isDarkMode ? 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800/40' : 'text-slate-700 bg-slate-100 hover:bg-slate-200 border border-slate-200')
+                ? (isDarkMode ? 'bg-[#18181b] text-emerald-400 border border-emerald-500/50 shadow-sm' : 'bg-teal-700 text-white shadow-sm')
+                : (isDarkMode ? 'text-zinc-300 hover:text-white bg-[#18181b]/60 border border-[#27272a]' : 'text-slate-700 bg-slate-100 hover:bg-slate-200 border border-slate-200')
             }`}
           >
-            <LayoutDashboard className={`w-3.5 h-3.5 ${activeTab === 'DASHBOARD' ? (isDarkMode ? 'text-emerald-500' : 'text-white') : ''}`} />
+            <LayoutDashboard className="w-4 h-4 shrink-0" />
             <span>{role === 'TEACHER' ? 'LMS Core Engine' : 'Lộ Trình Cá Nhân'}</span>
           </button>
 
           {/* Global Topic & Media Search Tab */}
           <button
             onClick={() => setActiveTab('TOPIC_SEARCH')}
-            className={`flex items-center gap-2 px-3.5 py-1.5 rounded-md font-bold transition-all ${
+            className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold whitespace-nowrap transition-all cursor-pointer ${
               activeTab === 'TOPIC_SEARCH'
                 ? (isDarkMode ? 'bg-emerald-600 text-white border border-emerald-400 shadow-md' : 'bg-emerald-600 text-white shadow-sm')
-                : (isDarkMode ? 'text-emerald-400 bg-emerald-500/10 border border-emerald-500/30' : 'text-emerald-700 bg-emerald-50 border border-emerald-200 hover:bg-emerald-100')
+                : (isDarkMode ? 'text-emerald-400 bg-emerald-500/10 border border-emerald-500/30' : 'text-emerald-800 bg-emerald-50 border border-emerald-200 hover:bg-emerald-100')
             }`}
           >
-            <Search className="w-3.5 h-3.5" />
+            <Search className="w-4 h-4 shrink-0" />
             <span>🔍 Tra Cứu Bài Học 4-in-1</span>
           </button>
 
           {/* Web Resources & Embedded Videos Tab */}
           <button
             onClick={() => setActiveTab('WEB_RESOURCES')}
-            className={`flex items-center gap-2 px-3.5 py-1.5 rounded-md font-bold transition-all ${
+            className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold whitespace-nowrap transition-all cursor-pointer ${
               activeTab === 'WEB_RESOURCES'
                 ? (isDarkMode ? 'bg-rose-600 text-white border border-rose-400 shadow-md' : 'bg-rose-600 text-white shadow-sm')
-                : (isDarkMode ? 'text-rose-400 bg-rose-500/10 border border-rose-500/30' : 'text-rose-700 bg-rose-50 border border-rose-200 hover:bg-rose-100')
+                : (isDarkMode ? 'text-rose-400 bg-rose-500/10 border border-rose-500/30' : 'text-rose-800 bg-rose-50 border border-rose-200 hover:bg-rose-100')
             }`}
           >
-            <Video className="w-3.5 h-3.5 fill-current" />
+            <Video className="w-4 h-4 shrink-0 fill-current" />
             <span>📺 Kho Video & Tài Liệu Mạng</span>
           </button>
 
           {/* Honor Roll Tab */}
           <button
             onClick={() => setActiveTab('HONOR')}
-            className={`flex items-center gap-2 px-3.5 py-1.5 rounded-md font-bold transition-all ${
+            className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold whitespace-nowrap transition-all cursor-pointer ${
               activeTab === 'HONOR'
                 ? 'bg-gradient-to-r from-amber-500 to-yellow-500 text-slate-900 border border-amber-300 shadow-sm'
-                : (isDarkMode ? 'text-amber-400 bg-amber-500/10 border border-amber-500/30' : 'text-amber-700 bg-amber-50 border border-amber-200 hover:bg-amber-100')
+                : (isDarkMode ? 'text-amber-400 bg-amber-500/10 border border-amber-500/30' : 'text-amber-800 bg-amber-50 border border-amber-200 hover:bg-amber-100')
             }`}
           >
-            <Trophy className={`w-3.5 h-3.5 ${activeTab === 'HONOR' ? 'text-slate-900 fill-slate-900' : 'fill-current'}`} />
+            <Trophy className={`w-4 h-4 shrink-0 ${activeTab === 'HONOR' ? 'text-slate-900 fill-slate-900' : 'fill-current'}`} />
             <span>🏆 Vinh Danh Tiêu Biểu ({awards.length})</span>
           </button>
 
-          {role === 'TEACHER' && (
-            <>
-              <button
-                onClick={() => setActiveTab('STUDENT_MGMT')}
-                className={`flex items-center gap-2 px-3.5 py-1.5 rounded-md transition-all ${
-                  activeTab === 'STUDENT_MGMT'
-                    ? (isDarkMode ? 'bg-[#18181b] text-white border border-emerald-500/40 shadow-sm font-bold' : 'bg-teal-700 text-white font-bold shadow-sm')
-                    : (isDarkMode ? 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800/40' : 'text-slate-700 bg-slate-100 hover:bg-slate-200 border border-slate-200')
-                }`}
-              >
-                <UserPlus className="w-3.5 h-3.5" />
-                <span>Quản Lý Học Sinh & Tài Khoản ({students.length})</span>
-              </button>
-
-              <button
-                onClick={() => setActiveTab('COLLABORATION')}
-                className={`flex items-center gap-2 px-3.5 py-1.5 rounded-md transition-all ${
-                  activeTab === 'COLLABORATION'
-                    ? (isDarkMode ? 'bg-[#18181b] text-white border border-emerald-500/40 shadow-sm' : 'bg-teal-700 text-white font-bold shadow-sm')
-                    : (isDarkMode ? 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800/40' : 'text-slate-700 bg-slate-100 hover:bg-slate-200 border border-slate-200')
-                }`}
-              >
-                <Users className="w-3.5 h-3.5" />
-                <span>Phân Quyền & Kho Bài Giảng ({colleagues.length})</span>
-              </button>
-            </>
-          )}
-
           <button
             onClick={() => setActiveTab('OCR')}
-            className={`flex items-center gap-2 px-3.5 py-1.5 rounded-md transition-all ${
+            className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold whitespace-nowrap transition-all cursor-pointer ${
               activeTab === 'OCR'
-                ? (isDarkMode ? 'bg-[#18181b] text-white border border-emerald-500/40 shadow-sm' : 'bg-teal-700 text-white font-bold shadow-sm')
-                : (isDarkMode ? 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800/40' : 'text-slate-700 bg-slate-100 hover:bg-slate-200 border border-slate-200')
+                ? (isDarkMode ? 'bg-[#18181b] text-emerald-400 border border-emerald-500/50 shadow-sm' : 'bg-teal-700 text-white shadow-sm')
+                : (isDarkMode ? 'text-zinc-300 hover:text-white bg-[#18181b]/60 border border-[#27272a]' : 'text-slate-700 bg-slate-100 hover:bg-slate-200 border border-slate-200')
             }`}
           >
-            <Camera className="w-3.5 h-3.5" />
+            <Camera className="w-4 h-4 shrink-0" />
             <span>Smart Grading (OCR)</span>
           </button>
 
           <button
             onClick={() => setActiveTab('LAB')}
-            className={`flex items-center gap-2 px-3.5 py-1.5 rounded-md transition-all ${
+            className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold whitespace-nowrap transition-all cursor-pointer ${
               activeTab === 'LAB'
-                ? (isDarkMode ? 'bg-[#18181b] text-white border border-emerald-500/40 shadow-sm' : 'bg-teal-700 text-white font-bold shadow-sm')
-                : (isDarkMode ? 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800/40' : 'text-slate-700 bg-slate-100 hover:bg-slate-200 border border-slate-200')
+                ? (isDarkMode ? 'bg-[#18181b] text-emerald-400 border border-emerald-500/50 shadow-sm' : 'bg-teal-700 text-white shadow-sm')
+                : (isDarkMode ? 'text-zinc-300 hover:text-white bg-[#18181b]/60 border border-[#27272a]' : 'text-slate-700 bg-slate-100 hover:bg-slate-200 border border-slate-200')
             }`}
           >
-            <Activity className="w-3.5 h-3.5" />
+            <Activity className="w-4 h-4 shrink-0" />
             <span>Phòng Thí Nghiệm Ảo</span>
           </button>
+
+          <button
+            onClick={() => setActiveTab('BANK')}
+            className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold whitespace-nowrap transition-all cursor-pointer ${
+              activeTab === 'BANK'
+                ? (isDarkMode ? 'bg-[#18181b] text-emerald-400 border border-emerald-500/50 shadow-sm' : 'bg-teal-700 text-white shadow-sm')
+                : (isDarkMode ? 'text-zinc-300 hover:text-white bg-[#18181b]/60 border border-[#27272a]' : 'text-slate-700 bg-slate-100 hover:bg-slate-200 border border-slate-200')
+            }`}
+          >
+            <BookOpen className="w-4 h-4 shrink-0" />
+            <span>Ngân Hàng Câu Hỏi GDPT</span>
+          </button>
+        </div>
+
+        {/* ROW 3: AI INTELLIGENCE & MANAGEMENT CONTROLS */}
+        <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-12 flex items-center gap-3 overflow-x-auto text-sm font-sans">
+          <span className="text-xs font-mono font-bold uppercase text-slate-400 tracking-wider hidden xl:inline shrink-0">
+            Công Cụ AI & Quản Lý:
+          </span>
 
           {/* Analytics Radar & Heatmap Tab */}
           <button
             onClick={() => setActiveTab('ANALYTICS')}
-            className={`flex items-center gap-2 px-3.5 py-1.5 rounded-md font-bold transition-all ${
+            className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold whitespace-nowrap transition-all cursor-pointer ${
               activeTab === 'ANALYTICS'
                 ? (isDarkMode ? 'bg-cyan-600 text-white border border-cyan-400 shadow-md' : 'bg-cyan-600 text-white shadow-sm')
-                : (isDarkMode ? 'text-cyan-400 bg-cyan-500/10 border border-cyan-500/30' : 'text-cyan-700 bg-cyan-50 border border-cyan-200 hover:bg-cyan-100')
+                : (isDarkMode ? 'text-cyan-400 bg-cyan-500/10 border border-cyan-500/30' : 'text-cyan-800 bg-cyan-50 border border-cyan-200 hover:bg-cyan-100')
             }`}
           >
-            <BarChart3 className="w-3.5 h-3.5" />
+            <BarChart3 className="w-4 h-4 shrink-0" />
             <span>📊 Báo Cáo Radar & Heatmap</span>
           </button>
 
           {/* Minigame Quiz Trigger */}
           <button
             onClick={() => setShowQuizGameModal(true)}
-            className={`flex items-center gap-2 px-3.5 py-1.5 rounded-md font-bold transition-all cursor-pointer ${
-              isDarkMode ? 'text-amber-400 bg-amber-500/10 border border-amber-500/30' : 'text-amber-700 bg-amber-50 border border-amber-200 hover:bg-amber-100'
+            className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold whitespace-nowrap transition-all cursor-pointer ${
+              isDarkMode ? 'text-amber-400 bg-amber-500/10 border border-amber-500/30' : 'text-amber-800 bg-amber-50 border border-amber-200 hover:bg-amber-100'
             }`}
           >
-            <Gamepad2 className="w-3.5 h-3.5 animate-bounce" />
+            <Gamepad2 className="w-4 h-4 shrink-0 animate-bounce" />
             <span>🎮 Minigame 1v1 & Speed Run</span>
           </button>
 
           {/* AI Physics Tutor Trigger */}
           <button
             onClick={() => setShowAITutorModal(true)}
-            className={`flex items-center gap-2 px-3.5 py-1.5 rounded-md font-bold transition-all cursor-pointer ${
-              isDarkMode ? 'text-emerald-400 bg-emerald-500/10 border border-emerald-500/30' : 'text-teal-700 bg-teal-50 border border-teal-200 hover:bg-teal-100'
+            className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold whitespace-nowrap transition-all cursor-pointer ${
+              isDarkMode ? 'text-emerald-400 bg-emerald-500/10 border border-emerald-500/30' : 'text-teal-800 bg-teal-50 border border-teal-200 hover:bg-teal-100'
             }`}
           >
-            <BrainCircuit className="w-3.5 h-3.5 animate-pulse" />
+            <BrainCircuit className="w-4 h-4 shrink-0 animate-pulse" />
             <span>🤖 AI Physics Tutor 24/7</span>
           </button>
 
           {/* AI Problem Solver & Diagnostic Advisor Trigger */}
           <button
             onClick={() => setShowAISolverModal(true)}
-            className={`flex items-center gap-2 px-3.5 py-1.5 rounded-md font-bold transition-all cursor-pointer ${
-              isDarkMode ? 'text-purple-400 bg-purple-500/10 border border-purple-500/30' : 'text-purple-700 bg-purple-50 border border-purple-200 hover:bg-purple-100'
+            className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold whitespace-nowrap transition-all cursor-pointer ${
+              isDarkMode ? 'text-purple-400 bg-purple-500/10 border border-purple-500/30' : 'text-purple-800 bg-purple-50 border border-purple-200 hover:bg-purple-100'
             }`}
           >
-            <Lightbulb className="w-3.5 h-3.5" />
+            <Lightbulb className="w-4 h-4 shrink-0" />
             <span>🧠 AI Giải Bài & Rút Bài Học</span>
           </button>
 
-          <button
-            onClick={() => setActiveTab('BANK')}
-            className={`flex items-center gap-2 px-3.5 py-1.5 rounded-md transition-all ${
-              activeTab === 'BANK'
-                ? (isDarkMode ? 'bg-[#18181b] text-white border border-emerald-500/40 shadow-sm' : 'bg-teal-700 text-white font-bold shadow-sm')
-                : (isDarkMode ? 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800/40' : 'text-slate-700 bg-slate-100 hover:bg-slate-200 border border-slate-200')
-            }`}
-          >
-            <BookOpen className="w-3.5 h-3.5" />
-            <span>Ngân Hàng Câu Hỏi GDPT</span>
-          </button>
+          {role === 'TEACHER' && (
+            <>
+              <button
+                onClick={() => setActiveTab('STUDENT_MGMT')}
+                className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold whitespace-nowrap transition-all cursor-pointer ${
+                  activeTab === 'STUDENT_MGMT'
+                    ? (isDarkMode ? 'bg-[#18181b] text-emerald-400 border border-emerald-500/50 shadow-sm font-bold' : 'bg-teal-700 text-white font-bold shadow-sm')
+                    : (isDarkMode ? 'text-zinc-300 hover:text-white bg-[#18181b]/60 border border-[#27272a]' : 'text-slate-700 bg-slate-100 hover:bg-slate-200 border border-slate-200')
+                }`}
+              >
+                <UserPlus className="w-4 h-4 shrink-0" />
+                <span>Quản Lý Học Sinh & Tài Khoản ({students.length})</span>
+              </button>
+
+              <button
+                onClick={() => setActiveTab('COLLABORATION')}
+                className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold whitespace-nowrap transition-all cursor-pointer ${
+                  activeTab === 'COLLABORATION'
+                    ? (isDarkMode ? 'bg-[#18181b] text-emerald-400 border border-emerald-500/50 shadow-sm' : 'bg-teal-700 text-white font-bold shadow-sm')
+                    : (isDarkMode ? 'text-zinc-300 hover:text-white bg-[#18181b]/60 border border-[#27272a]' : 'text-slate-700 bg-slate-100 hover:bg-slate-200 border border-slate-200')
+                }`}
+              >
+                <Users className="w-4 h-4 shrink-0" />
+                <span>Phân Quyền & Kho Bài Giảng ({colleagues.length})</span>
+              </button>
+            </>
+          )}
+
         </div>
+
       </div>
 
       {/* Main Container Content */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+      <main className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-12 py-8 space-y-8">
         
         {activeTab === 'DASHBOARD' && (
           role === 'TEACHER' ? (
