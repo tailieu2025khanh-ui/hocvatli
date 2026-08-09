@@ -143,8 +143,10 @@ export default function App() {
   };
 
   return (
-    <div className={`min-h-screen font-sans antialiased transition-colors duration-200 ${
-      isDarkMode ? 'bg-[#0c0c0e] text-zinc-100' : 'bg-[#f8fafc] text-slate-800'
+    <div className={`min-h-screen font-sans antialiased transition-colors duration-300 ${
+      isDarkMode
+        ? 'bg-gradient-to-br from-[#0b132b] via-[#0f172a] to-[#1c2541] text-slate-100'
+        : 'bg-gradient-to-br from-[#f0f7ff] via-[#eef6ff] to-[#e6f0fa] text-slate-800'
     }`}>
       
       {/* Top Portal Navigation Bar (HCM-EDU Style) */}
