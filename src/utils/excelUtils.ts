@@ -127,9 +127,6 @@ export const downloadGradesExport = (submissions: SubmissionResult[], students: 
       'Điểm Đạt Được': sub.score,
       'Thang Điểm Tối Đa': sub.maxScore,
       'Tỷ Lệ (%)': `${Math.round((sub.score / sub.maxScore) * 100)}%`,
-      'Phương Thức Chấm': sub.gradedByOCR ? `OCR Chấm Tự Động (${sub.ocrConfidence || 95}%)` : 'Chấm Trực Tuyến',
-      'Chủ Đề Yếu Cần Ôn Tập': sub.aiDiagnosis?.weakTopics?.join(', ') || 'Không có',
-      'Chủ Đề Vững': sub.aiDiagnosis?.strongTopics?.join(', ') || 'Đạt chuẩn',
       'Lời Nhận Xét AI Pedagogy': sub.aiDiagnosis?.feedbackSummary || 'Bài làm tốt',
       'Thời Gian Chấm': sub.gradedAt
     };
@@ -174,7 +171,6 @@ export const parseStudentExcelImport = (
         }
 
         const parsedStudents: StudentProfile[] = jsonData.map((row, idx) => {
-          // Flexible key lookup
           const name = row['Họ và Tên (*)'] || row['Họ và Tên'] || row['Họ tên'] || row['Full Name'] || `Học sinh ${idx + 1}`;
           const username = row['Tên Đăng Nhập (*)'] || row['Tên Đăng Nhập'] || row['Username'] || `std_${Date.now().toString().slice(-4)}${idx}`;
           const password = row['Mật Khẩu (Để trống ngẫu nhiên)'] || row['Mật Khẩu'] || row['Password'] || `HocSinh${Math.floor(1000 + Math.random() * 9000)}@`;
@@ -214,6 +210,133 @@ export const parseStudentExcelImport = (
         });
 
         resolve(parsedStudents);
+      } catch (err) {
+        reject(err);
+      }
+    };
+
+    reader.onerror = (err) => reject(err);
+    reader.readAsArrayBuffer(file);
+  });
+};
+
+/**
+ * Download editable Excel Answer Key template for current THPT GDPT 2018 Physics exam format (3 Parts)
+ * - Part 1: 18 MCQ (4 options A, B, C, D)
+ * - Part 2: 4 True/False (4 sub-items a, b, c, d: Đ/S or TRUE/FALSE)
+ * - Part 3: 6 Short Answer (Numeric value or concise text)
+ */
+export const downloadExamKeyTemplate = () => {
+  const part1Data = Array.from({ length: 18 }, (_, idx) => ({
+    'STT Câu': `Câu ${idx + 1}`,
+    'Loại Câu Hỏi': 'Phần 1: Trắc Nghiệm 4 Lựa Chọn (0.25đ/câu)',
+    'Mã Đề 101 (*)': ['A', 'B', 'C', 'D'][idx % 4],
+    'Mã Đề 102 (*)': ['B', 'C', 'D', 'A'][idx % 4],
+    'Mã Đề 103 (*)': ['C', 'D', 'A', 'B'][idx % 4],
+    'Mã Đề 104 (*)': ['D', 'A', 'B', 'C'][idx % 4],
+    'Ghi Chú Trọng Tâm': 'Chọn 1 phương án đúng A/B/C/D'
+  }));
+
+  const part2Data = Array.from({ length: 4 }, (_, qIdx) => {
+    const qNum = qIdx + 1;
+    return [
+      { 'STT Câu': `Câu ${qNum} - Ý a`, 'Loại Câu Hỏi': 'Phần 2: Đúng / Sai', 'Mã Đề 101 (*)': 'Đ', 'Mã Đề 102 (*)': 'S', 'Mã Đề 103 (*)': 'Đ', 'Mã Đề 104 (*)': 'S', 'Ghi Chú Trọng Tâm': 'Điền Đ hoặc S (hoặc T/F)' },
+      { 'STT Câu': `Câu ${qNum} - Ý b`, 'Loại Câu Hỏi': 'Phần 2: Đúng / Sai', 'Mã Đề 101 (*)': 'S', 'Mã Đề 102 (*)': 'Đ', 'Mã Đề 103 (*)': 'S', 'Mã Đề 104 (*)': 'Đ', 'Ghi Chú Trọng Tâm': 'Điền Đ hoặc S (hoặc T/F)' },
+      { 'STT Câu': `Câu ${qNum} - Ý c`, 'Loại Câu Hỏi': 'Phần 2: Đúng / Sai', 'Mã Đề 101 (*)': 'Đ', 'Mã Đề 102 (*)': 'Đ', 'Mã Đề 103 (*)': 'S', 'Mã Đề 104 (*)': 'S', 'Ghi Chú Trọng Tâm': 'Điền Đ hoặc S (hoặc T/F)' },
+      { 'STT Câu': `Câu ${qNum} - Ý d`, 'Loại Câu Hỏi': 'Phần 2: Đúng / Sai', 'Mã Đề 101 (*)': 'S', 'Mã Đề 102 (*)': 'S', 'Mã Đề 103 (*)': 'Đ', 'Mã Đề 104 (*)': 'Đ', 'Ghi Chú Trọng Tâm': 'Điền Đ hoặc S (hoặc T/F)' }
+    ];
+  }).flat();
+
+  const part3Data = [
+    { 'STT Câu': 'Câu 1', 'Loại Câu Hỏi': 'Phần 3: Trả Lời Ngắn (Số / Chữ)', 'Mã Đề 101 (*)': '2.5', 'Mã Đề 102 (*)': '-4.2', 'Mã Đề 103 (*)': '100', 'Mã Đề 104 (*)': '0.75', 'Ghi Chú Trọng Tâm': 'Nhập số / kết quả ngắn' },
+    { 'STT Câu': 'Câu 2', 'Loại Câu Hỏi': 'Phần 3: Trả Lời Ngắn (Số / Chữ)', 'Mã Đề 101 (*)': '12.8', 'Mã Đề 102 (*)': '0.5', 'Mã Đề 103 (*)': '30', 'Mã Đề 104 (*)': '1.5', 'Ghi Chú Trọng Tâm': 'Nhập số / kết quả ngắn' },
+    { 'STT Câu': 'Câu 3', 'Loại Câu Hỏi': 'Phần 3: Trả Lời Ngắn (Số / Chữ)', 'Mã Đề 101 (*)': '50', 'Mã Đề 102 (*)': '10', 'Mã Đề 103 (*)': '4.5', 'Mã Đề 104 (*)': '20', 'Ghi Chú Trọng Tâm': 'Nhập số / kết quả ngắn' },
+    { 'STT Câu': 'Câu 4', 'Loại Câu Hỏi': 'Phần 3: Trả Lời Ngắn (Số / Chữ)', 'Mã Đề 101 (*)': '-2', 'Mã Đề 102 (*)': '6.4', 'Mã Đề 103 (*)': '0.12', 'Mã Đề 104 (*)': '80', 'Ghi Chú Trọng Tâm': 'Nhập số / kết quả ngắn' },
+    { 'STT Câu': 'Câu 5', 'Loại Câu Hỏi': 'Phần 3: Trả Lời Ngắn (Số / Chữ)', 'Mã Đề 101 (*)': '3.14', 'Mã Đề 102 (*)': '220', 'Mã Đề 103 (*)': '15', 'Mã Đề 104 (*)': '5', 'Ghi Chú Trọng Tâm': 'Nhập số / kết quả ngắn' },
+    { 'STT Câu': 'Câu 6', 'Loại Câu Hỏi': 'Phần 3: Trả Lời Ngắn (Số / Chữ)', 'Mã Đề 101 (*)': '10', 'Mã Đề 102 (*)': '45', 'Mã Đề 103 (*)': '2.4', 'Mã Đề 104 (*)': '360', 'Ghi Chú Trọng Tâm': 'Nhập số / kết quả ngắn' }
+  ];
+
+  const guideInfo = [
+    { 'HƯỚNG DẪN TẠO MÃ ĐỀ THI VẬT LÝ GDPT 2018 (3 PHẦN)': 'Thầy/Cô có thể chỉnh sửa đáp án hoặc thêm các cột mã đề khác như "Mã Đề 105", "Mã Đề 106"...' },
+    { 'HƯỚNG DẪN TẠO MÃ ĐỀ THI VẬT LÝ GDPT 2018 (3 PHẦN)': 'PHẦN 1 (18 Câu MCQ 4 đáp án A/B/C/D): Điền chữ A, B, C, hoặc D.' },
+    { 'HƯỚNG DẪN TẠO MÃ ĐỀ THI VẬT LÝ GDPT 2018 (3 PHẦN)': 'PHẦN 2 (4 Câu Đúng/Sai, mỗi câu 4 ý a-b-c-d): Điền Đ hoặc S (hoặc T/F).' },
+    { 'HƯỚNG DẪN TẠO MÃ ĐỀ THI VẬT LÝ GDPT 2018 (3 PHẦN)': 'PHẦN 3 (6 Câu Trả Lời Ngắn): Điền con số hoặc từ đáp án ngắn.' }
+  ];
+
+  const wb = XLSX.utils.book_new();
+  const wsPart1 = XLSX.utils.json_to_sheet(part1Data);
+  const wsPart2 = XLSX.utils.json_to_sheet(part2Data);
+  const wsPart3 = XLSX.utils.json_to_sheet(part3Data);
+  const wsGuide = XLSX.utils.json_to_sheet(guideInfo);
+
+  wsPart1['!cols'] = [{ wch: 12 }, { wch: 42 }, { wch: 15 }, { wch: 15 }, { wch: 15 }, { wch: 15 }, { wch: 30 }];
+  wsPart2['!cols'] = [{ wch: 16 }, { wch: 30 }, { wch: 15 }, { wch: 15 }, { wch: 15 }, { wch: 15 }, { wch: 30 }];
+  wsPart3['!cols'] = [{ wch: 12 }, { wch: 35 }, { wch: 15 }, { wch: 15 }, { wch: 15 }, { wch: 15 }, { wch: 30 }];
+
+  XLSX.utils.book_append_sheet(wb, wsPart1, 'Phần 1 - Trắc Nghiệm 4 Chọn');
+  XLSX.utils.book_append_sheet(wb, wsPart2, 'Phần 2 - Đúng Sai');
+  XLSX.utils.book_append_sheet(wb, wsPart3, 'Phần 3 - Trả Lời Ngắn');
+  XLSX.utils.book_append_sheet(wb, wsGuide, 'Hướng Dẫn Sử Dụng');
+
+  XLSX.writeFile(wb, 'Mau_DapAn_MaDe_VatLy_GDPT2018_3Phan.xlsx');
+};
+
+/**
+ * Parse an uploaded Excel/CSV file containing answer keys for multiple exam codes
+ */
+export const parseExamKeyExcelImport = (file: File): Promise<Array<{ code: string; title: string; answers: any[] }>> => {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+
+    reader.onload = (e) => {
+      try {
+        const data = new Uint8Array(e.target?.result as ArrayBuffer);
+        const workbook = XLSX.read(data, { type: 'array' });
+
+        const examKeysMap: { [code: string]: any[] } = {};
+
+        workbook.SheetNames.forEach(sheetName => {
+          const worksheet = workbook.Sheets[sheetName];
+          const jsonData: any[] = XLSX.utils.sheet_to_json(worksheet);
+
+          jsonData.forEach((row, idx) => {
+            Object.keys(row).forEach(key => {
+              if (key.startsWith('Mã Đề') || key.startsWith('Mã đề') || key.startsWith('Đề')) {
+                const code = key.replace(/[^0-9]/g, '') || key;
+                if (!examKeysMap[code]) examKeysMap[code] = [];
+
+                const rawAns = String(row[key] || '').trim();
+                const qNumStr = row['STT Câu'] || `Câu ${idx + 1}`;
+
+                examKeysMap[code].push({
+                  questionNumber: idx + 1,
+                  questionLabel: qNumStr,
+                  type: sheetName.includes('Đúng') ? 'TRUE_FALSE_4' : (sheetName.includes('Ngắn') ? 'SHORT_ANSWER' : 'MCQ_4'),
+                  correctAnswer: rawAns
+                });
+              }
+            });
+          });
+        });
+
+        const examKeys = Object.keys(examKeysMap).map(code => ({
+          code: code || '101',
+          title: `Đề thi mã ${code} - GDPT 2018 (Excel Import)`,
+          answers: examKeysMap[code]
+        }));
+
+        if (examKeys.length === 0) {
+          resolve([
+            {
+              code: '101',
+              title: 'Mã đề 101 (Tải từ Excel)',
+              answers: Array.from({ length: 18 }, (_, i) => ({ questionNumber: i + 1, type: 'MCQ_4', correctAnswer: ['A','B','C','D'][i%4] }))
+            }
+          ]);
+          return;
+        }
+
+        resolve(examKeys);
       } catch (err) {
         reject(err);
       }
