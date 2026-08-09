@@ -121,6 +121,10 @@ export default function App() {
     setMaterials(prev => prev.filter(m => m.id !== materialId));
   };
 
+  const handleUpdateMaterial = (updatedMat: TeachingMaterial) => {
+    setMaterials(prev => prev.map(m => m.id === updatedMat.id ? updatedMat : m));
+  };
+
   const handleAddTask = (newTask: AssignedTask) => {
     setTasks(prev => [newTask, ...prev]);
   };
@@ -352,6 +356,7 @@ export default function App() {
                 currentTeacher={currentTeacher}
                 onAddMaterial={handleAddMaterial}
                 onDeleteMaterial={handleDeleteMaterial}
+                onUpdateMaterial={handleUpdateMaterial}
                 onAssignTask={(mat) => {
                   handleAddTask({
                     id: `task_${Date.now()}`,
@@ -415,6 +420,7 @@ export default function App() {
                 onUpdatePermissions={handleUpdatePermissions}
                 onAddMaterial={handleAddMaterial}
                 onDeleteMaterial={handleDeleteMaterial}
+                onUpdateMaterial={handleUpdateMaterial}
                 onAddTask={handleAddTask}
               />
             )}
